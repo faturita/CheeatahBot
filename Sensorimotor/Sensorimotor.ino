@@ -169,18 +169,28 @@ struct sensortype {
 
 // =========== DC Control using the encoder.
 int targetpos = 0;
-int TORQUE=255;
+int TORQUE=1;
+
+int oldcurrentpos=0;
 
 void setTargetPos(int newtargetpos)
 {
   targetpos = newtargetpos;
+  TORQUE=1;
+}
+
+int increaseTorque()
+{
+  if ((TORQUE++)<=255)
+    TORQUE=255;
+  return TORQUE;
 }
 
 bool updatedc(Adafruit_DCMotor *dcmotor, int currentpos)
-{
+{ 
   if (targetpos != currentpos)
   {
-    dcmotor->setSpeed(TORQUE);
+    dcmotor->setSpeed(increaseTorque());
 
     if (targetpos < currentpos)
       dcmotor->run(BACKWARD);
@@ -272,12 +282,12 @@ void setup() {
   setupSuperSensor();
 
   scanner.servo.attach(10);
-  scanner.pos=90;
-  scanner.tgtPos=90; 
+  scanner.pos=60;
+  scanner.tgtPos=60; 
 
   pan.servo.attach(9);
-  pan.pos = 57;
-  pan.tgtPos = 57;// 57 is center
+  pan.pos = 60;
+  pan.tgtPos = 60;// 57 is center
 
   setTargetPos(0);
   
@@ -305,15 +315,33 @@ void StateMachine(int state, int controlvalue)
       myMotor1->run(FORWARD);
       myMotor2->setSpeed(controlvalue);
       myMotor2->run(FORWARD); 
-      break;  
+      break; 
     case 4:
-      setTargetPos(controlvalue);
+      myMotor1->setSpeed(controlvalue);
+      myMotor1->run(BACKWARD);
+      myMotor2->setSpeed(controlvalue);
+      myMotor2->run(BACKWARD); 
       break;   
+    case 5:
+      myMotor1->setSpeed(controlvalue);
+      myMotor1->run(BACKWARD);
+      myMotor2->setSpeed(controlvalue);
+      myMotor2->run(FORWARD); 
+      break;  
     case 6:
+      myMotor1->setSpeed(controlvalue);
+      myMotor1->run(FORWARD);
+      myMotor2->setSpeed(controlvalue);
+      myMotor2->run(BACKWARD); 
+      break;  
+    case 7:
+      setTargetPos(controlvalue-150);
+      break;   
+    case 8:
       // Update desired position.
       pan.tgtPos = controlvalue;
       break;
-    case 7:
+    case 9:
       scanner.tgtPos = controlvalue;   
     default:
       // Do Nothing
@@ -382,6 +410,9 @@ void loop()
   sensor.scan = scanner.pos;
 
   StateMachine(state,controlvalue);
+
+  //delay(250);
+
 }
 
 

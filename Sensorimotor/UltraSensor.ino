@@ -41,12 +41,13 @@ inline void  updateUltraSensor() {
     if (debug) Serial.print(distance);
     if (debug) Serial.println(" cm");
   }
+  
   if (distance >= 200 || distance <= 0){
     if (debug) Serial.println("Out of range");
   }
   else {
-    if (debug) Serial.print(distance); 
-    if (debug) Serial.println(" cm");
+    //if (debug) Serial.print(distance); 
+    //if (debug) Serial.println(" cm");
   }
   sensor.distance = distance;
 
