@@ -15,52 +15,44 @@ baudrate = 9600
 
 def serialcomm(serialportname=None):
     serialport = 0
-    sera = None
-    serb = None
+    serials = []
 
     if (serialportname):
         sera = serial.Serial(port=serialportname, baudrate=baudrate,timeout=0)
-    if (sera == None):
+        serials.append(sera)
+    else:
         while (serialport<15):
             if (os.path.exists('/dev/ttyACM'+str(serialport))):
                 sera = serial.Serial(port='/dev/ttyACM'+str(serialport), baudrate=baudrate, timeout=0)
-                break
-            serialport = serialport + 1
-
-        serialport = serialport + 1
-        while (serialport<15):
-            if (os.path.exists('/dev/ttyACM'+str(serialport))):
-                serb = serial.Serial(port='/dev/ttyACM'+str(serialport), baudrate=baudrate, timeout=0)
+                serials.append(sera)
                 break
             serialport = serialport + 1
 
     time.sleep(5)
 
-    if (sera == None and serb != None):
-        return [serb, sera]
-    elif (sera != None and serb == None):
-        return [sera, serb]
+    if (len(serials)==0):
+        return [None, None]
 
-    # Initialize connection with Arduino
-    idstring = sera.read(250)
-    if (serb):
-        idstring = serb.read(250)
+    for sera in serials:
+        idstring = sera.read(250)
+        print idstring
 
-    for tries in range(1, 10):
-        sera.write('I')
-        time.sleep(1)
-        idstring = sera.read(100)
+        for tries in range(1, 10):
+            sera.write('I')
+            time.sleep(1)
+            idstring = sera.read(100)
+            print idstring
 
-        if ('CHET' in idstring):
-            mrn = serb
-            smr = sera
-            print('CheeatahBot detected.')
-            return [smr, mrn]
-        elif ('MTRN' in idstring):
-            smr = serb
-            mrn = sera
-            print('Motornneuron,Sensorimotor detected.')
-            return [smr, mrn]
+            if ('CHET' in idstring):
+                mrn = None
+                smr = sera
+                print('CheeatahBot detected.')
+                return [smr, mrn]
+            elif ('MTRN' in idstring):
+                smr = serb
+                mrn = sera
+                print('Motornneuron,Sensorimotor detected.')
+                return [smr, mrn]
 
     print ('Did not find serial')
     return [None, None]
