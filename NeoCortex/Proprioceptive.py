@@ -14,6 +14,7 @@ baudrate = 9600
 
 
 def serialcomm(serialportname=None):
+    retries=0
     serialport = 0
     serials = []
 

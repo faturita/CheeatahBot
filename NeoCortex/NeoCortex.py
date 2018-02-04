@@ -120,15 +120,27 @@ print 'Connection to Remote Controller established.'
 # Open connection to tilt sensor (@deprecated)
 #hidraw = prop.setupsensor()
 # Open serial connection to MotorUnit and Sensorimotor Arduinos.
-[ssmr, mtrn] = prop.serialcomm()
+def doserial():
+    retries=1
+    ssmr=None
+    mtrn=None
+    while (retries<5):
+        try:
+            [ssmr, mtrn] = prop.serialcomm()
+            print 'Connection established'
+            return [ssmr, mtrn]
+        except Exception as e:
+            print 'Error while establishing serial connection.'
+            retries=retries+1
+
+    return [ssmr, mtrn]
+
+[ssmr, mtrn] = doserial()
 
 tgt = -300
 
-scanner = 90
-pan = 90
-
 # Pan and tilt
-visualpos = [90,95]
+visualpos = [60,150]
 
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
 #  sent to listening servers.
@@ -258,11 +270,11 @@ while(True):
         elif (data=='['):
             # Nose down
             visualpos[1]=visualpos[1]-1;
-            ssmr.write('A9'+'{:3d}'.format(visualpos[1]))
+            ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
         elif (data==']'):
             # Nose up
             visualpos[1]=visualpos[1]+1;
-            ssmr.write('A9'+'{:3d}'.format(visualpos[1]))
+            ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
         elif (data=='X'):
             break
     except Exception as e:
@@ -272,7 +284,7 @@ while(True):
             ssmr.close()
         if (not mtrn == None):
             mtrn.close()
-        [ssmr, mtrn] = prop.serialcomm()
+        [ssmr, mtrn] = doserial()
 
         # Instruct the Sensorimotor Cortex to stop wandering.
         if (ssmr != None):
