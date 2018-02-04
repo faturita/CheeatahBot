@@ -237,6 +237,16 @@ while(True):
         if (data == 'K'):
             # Automode
             automode = (not automode)
+        elif (data=='W'):
+            ssmr.write('A3050')
+        elif (data=='S'):
+            ssmr.write('A4050')
+        elif (data=='A'):
+            ssmr.write('A1050')
+        elif (data=='D'):
+            ssmr.write('A2050')
+        elif (data==' '):
+            ssmr.write('A3000')
         elif (data=='{'):
             # Camera left
             visualpos[0]=visualpos[0]+1;
