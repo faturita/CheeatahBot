@@ -140,7 +140,7 @@ def doserial():
 tgt = -300
 
 # Pan and tilt
-visualpos = [60,150]
+visualpos = [60,150,90]
 
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
 #  sent to listening servers.
@@ -275,7 +275,15 @@ while(True):
             # Nose up
             visualpos[1]=visualpos[1]+1;
             ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
-        elif (data=='X'):
+        elif (data=='['):
+            # Nose down
+            visualpos[2]=visualpos[2]-1;
+            ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
+        elif (data=='>'):
+            # Nose up
+            visualpos[2]=visualpos[2]+1;
+            ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
+        elif (data=='<'):
             break
     except Exception as e:
         print "Error:" + e.message
