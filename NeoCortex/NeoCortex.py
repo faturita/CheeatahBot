@@ -275,7 +275,7 @@ while(True):
             # Nose up
             visualpos[1]=visualpos[1]+1;
             ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
-        elif (data=='['):
+        elif (data=='<'):
             # Nose down
             visualpos[2]=visualpos[2]-1;
             ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
