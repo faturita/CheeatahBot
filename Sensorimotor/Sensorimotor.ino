@@ -175,8 +175,10 @@ int oldcurrentpos=0;
 
 void setTargetPos(int newtargetpos)
 {
+
   targetpos = newtargetpos;
   TORQUE=1;
+
 }
 
 int increaseTorque()
@@ -420,7 +422,7 @@ void setup() {
   //setupMotorEncoders();
   setupEncoder();
   //setupUltraSensor();
-  //setupSuperSensor();
+  setupSuperSensor();
 
   scanner.servo.attach(10);
   scanner.pos=0;
@@ -449,9 +451,12 @@ void loop()
 
   //loopEncoders();
 
-  //checksensors();
   //updateUltraSensor();
-  //updateSuperSensor();
+  if (checksensors())
+  {
+    updateSuperSensor();
+  }
+  burstsensors();
 
   pan.update();
   sensor.pan = pan.pos;

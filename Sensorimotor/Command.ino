@@ -4,15 +4,7 @@ char buffer[5];
 
 void readcommand(int &state, int &controlvalue)
 {
-  // Format A1000 >> A1220   --> Close grip
-  // A2255 >> Open Grip
-  // A6090 >> 90 deg wrist A6010 --> A6180
-  // A3220 or A4220 Move forward backward shoulder NO LONGER
-  // A7150 will keep the shoulder at zero encoder angle arm vertical. 
-  //       So AA140 will pull it up
-  // A8220 clockwise A9220 counter
-  // AA180 -> Elbow is now a degree based encoder.  Not rotational.
-  // Format A5000  Reset everything.
+  // Format ACNNN, 'A', C is command, NNN is the controlvalue.
   memset(buffer, 0, 5);
   int readbytes = Serial.readBytes(buffer, 4);
 
@@ -71,11 +63,13 @@ void parseCommand(int &state, int &controlvalue)
         break;
       case 'U':
         updateUltraSensor();
+        updateSuperSensor();
         Serial.print(sensor.acx);Serial.print(":");Serial.print(sensor.acy);Serial.print(",");Serial.print(sensor.acz);Serial.print(",");Serial.print(sensor.distance);Serial.println();
         break;
       case '=':
         resetEncoderPos();
-        targetpos=0;
+        setTargetPos(0);
+        state=0;
         //setTargetPos(90/10);
         //elbow.tgtPos=90;
         //wrist.tgtPos=90;

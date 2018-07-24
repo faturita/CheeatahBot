@@ -26,8 +26,10 @@ int fps()
   return freqValue;
 }
 
+bool sensorburst = false;
+int sampleCounter = 0;
 
-void checksensors()
+bool checksensors()
 {
   static int counter = 0;
   if (counter >= 255)
@@ -35,11 +37,10 @@ void checksensors()
     counter = 0;
   }
   sensor.counter = counter++;
+  return (sensorburst);
 
 }
 
-bool sensorburst = false;
-int sampleCounter = 0;
 
 void burstsensors() {
   if (sensorburst)
