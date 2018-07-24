@@ -70,11 +70,12 @@ void parseCommand(int &state, int &controlvalue)
         Serial.println( sensor.armencoder );
         break;
       case 'U':
-        Serial.print(sensor.acx);Serial.print(":");Serial.print(sensor.acy);Serial.print(",");Serial.print(sensor.acz);Serial.print(",");Serial.println();
+        updateUltraSensor();
+        Serial.print(sensor.acx);Serial.print(":");Serial.print(sensor.acy);Serial.print(",");Serial.print(sensor.acz);Serial.print(",");Serial.print(sensor.distance);Serial.println();
         break;
       case '=':
         resetEncoderPos();
-        //targetpos=0;
+        targetpos=0;
         //setTargetPos(90/10);
         //elbow.tgtPos=90;
         //wrist.tgtPos=90;
