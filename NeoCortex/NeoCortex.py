@@ -120,22 +120,34 @@ print 'Connection to Remote Controller established.'
 # Open connection to tilt sensor (@deprecated)
 #hidraw = prop.setupsensor()
 # Open serial connection to MotorUnit and Sensorimotor Arduinos.
-[ssmr, mtrn] = prop.serialcomm()
+def doserial():
+    retries=1
+    ssmr=None
+    mtrn=None
+    while (retries<5):
+        try:
+            [ssmr, mtrn] = prop.serialcomm()
+            print 'Connection established'
+            return [ssmr, mtrn]
+        except Exception as e:
+            print 'Error while establishing serial connection.'
+            retries=retries+1
+
+    return [ssmr, mtrn]
+
+[ssmr, mtrn] = doserial()
 
 tgt = -300
 
-scanner = 90
-pan = 90
-
 # Pan and tilt
-visualpos = [90,95]
+visualpos = [60,150,90]
 
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
 #  sent to listening servers.
 sensesensor = True
 
 # Connect remotely to any client that is waiting for sensor loggers.
-sensorimotor = senso.Sensorimotor('sensorimotor',44,'ffffffhhhhhhhhhh')
+sensorimotor = senso.Sensorimotor('sensorimotor',36,'hhfhhhhhhhffhhh')
 sensorimotor.start()
 sensorimotor.cleanbuffer(ssmr)
 
@@ -237,6 +249,16 @@ while(True):
         if (data == 'K'):
             # Automode
             automode = (not automode)
+        elif (data=='W'):
+            ssmr.write('A3050')
+        elif (data=='S'):
+            ssmr.write('A4050')
+        elif (data=='A'):
+            ssmr.write('A1050')
+        elif (data=='D'):
+            ssmr.write('A2050')
+        elif (data==' '):
+            ssmr.write('A3000')
         elif (data=='{'):
             # Camera left
             visualpos[0]=visualpos[0]+1;
@@ -248,12 +270,20 @@ while(True):
         elif (data=='['):
             # Nose down
             visualpos[1]=visualpos[1]-1;
-            ssmr.write('A9'+'{:3d}'.format(visualpos[1]))
+            ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
         elif (data==']'):
             # Nose up
             visualpos[1]=visualpos[1]+1;
-            ssmr.write('A9'+'{:3d}'.format(visualpos[1]))
-        elif (data=='X'):
+            ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
+        elif (data=='<'):
+            # Nose down
+            visualpos[2]=visualpos[2]-1;
+            ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
+        elif (data=='>'):
+            # Nose up
+            visualpos[2]=visualpos[2]+1;
+            ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
+        elif (data=='<'):
             break
     except Exception as e:
         print "Error:" + e.message
@@ -262,7 +292,7 @@ while(True):
             ssmr.close()
         if (not mtrn == None):
             mtrn.close()
-        [ssmr, mtrn] = prop.serialcomm()
+        [ssmr, mtrn] = doserial()
 
         # Instruct the Sensorimotor Cortex to stop wandering.
         if (ssmr != None):
