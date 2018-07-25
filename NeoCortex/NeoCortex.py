@@ -189,6 +189,8 @@ sur = Surrogator(sock)
 target = [0,0,0]
 automode = False;
 
+speed=50
+
 fps = Fps()
 fps.tic()
 
@@ -250,15 +252,23 @@ while(True):
             # Automode
             automode = (not automode)
         elif (data=='W'):
-            ssmr.write('A3050')
+            ssmr.write('A3'+'{:3d}'.format(speed))
         elif (data=='S'):
-            ssmr.write('A4050')
+            ssmr.write('A4'+'{:3d}'.format(speed))
         elif (data=='A'):
-            ssmr.write('A1050')
+            ssmr.write('A1'+'{:3d}'.format(speed))
         elif (data=='D'):
-            ssmr.write('A2050')
+            ssmr.write('A2'+'{:3d}'.format(speed))
         elif (data==' '):
             ssmr.write('A3000')
+        elif (data==','):
+            speed = speed + 1
+            if (speed > 250):
+                speed = 250
+        elif (data=='.'):
+            speed = speed - 1
+            if (speed < 50):
+                speed = 50
         elif (data=='{'):
             # Camera left
             visualpos[0]=visualpos[0]+1;
