@@ -144,7 +144,7 @@ visualpos = [60,150,90]
 
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
 #  sent to listening servers.
-sensesensor = True
+sensesensor = False
 
 # Connect remotely to any client that is waiting for sensor loggers.
 sensorimotor = senso.Sensorimotor('sensorimotor',36,'fffhhhhhhhhhhhh')
