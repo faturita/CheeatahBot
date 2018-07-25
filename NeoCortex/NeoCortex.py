@@ -262,13 +262,9 @@ while(True):
         elif (data==' '):
             ssmr.write('A3000')
         elif (data==','):
-            speed = speed + 1
-            if (speed > 250):
-                speed = 250
+            speed = 250
         elif (data=='.'):
-            speed = speed - 1
-            if (speed < 50):
-                speed = 50
+            speed = 50
         elif (data=='{'):
             # Camera left
             visualpos[0]=visualpos[0]+1;
