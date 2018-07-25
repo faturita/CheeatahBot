@@ -148,9 +148,11 @@ void doEncoder2()
 
 
 struct sensortype {
+  long encoder1; // 4
+  long encoder2; // 4 
+  long distance; // 4 
   int counter; // 2
   int armencoder; // 2
-  long distance; // 4
   int16_t acx;    // 2
   int16_t acy;    // 2
   int16_t acz;    // 2
@@ -158,8 +160,6 @@ struct sensortype {
   int16_t gx;    // 2
   int16_t gy;    // 2
   int16_t gz;    // 2
-  long encoder1; // 4
-  long encoder2; // 4
   int pan;        // 2
   int scan;       // 2
   int fps;        // 2
@@ -455,6 +455,7 @@ void loop()
   if (checksensors())
   {
     updateSuperSensor();
+    updateUltraSensor();
   }
   burstsensors();
 

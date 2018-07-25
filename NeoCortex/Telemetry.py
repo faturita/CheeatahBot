@@ -87,6 +87,7 @@ plotx = []
 counter = 0
 
 length = 36
+unpackcode = 'iiihhhhhhhhhhhh'
 
 if (serialconnected):
    ser.write('A7180')
@@ -110,7 +111,7 @@ while True:
 
       if myByte == 'E' and len(data)>0 and len(data) == length:
           # is  a valid message struct
-          new_values = unpack('hhfhhhhhhhffhhh',data)
+          new_values = unpack(unpackcode,data)
           #new_values = unpack('ffffffhhhhhhhhhh', data)
           print str(new_values)
           #print str(new_values[1]) + '\t' + str(new_values[2]) + '\t' + str(new_values[3])

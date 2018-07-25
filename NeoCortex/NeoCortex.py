@@ -147,7 +147,7 @@ visualpos = [60,150,90]
 sensesensor = True
 
 # Connect remotely to any client that is waiting for sensor loggers.
-sensorimotor = senso.Sensorimotor('sensorimotor',38,'hhfhhhhhhhffhhh')
+sensorimotor = senso.Sensorimotor('sensorimotor',36,'fffhhhhhhhhhhhh')
 sensorimotor.start()
 sensorimotor.cleanbuffer(ssmr)
 

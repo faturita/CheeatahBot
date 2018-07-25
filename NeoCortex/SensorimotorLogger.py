@@ -107,6 +107,7 @@ class Sensorimotor:
 
 
     def send(self,data):
+        #print self.server_address
         sent = self.sock.sendto(data, self.server_address)
 
     def picksensorsample(self, ser):
@@ -121,12 +122,14 @@ class Sensorimotor:
           readcount = 0
           #data = readsomething(ser,44)
           self.data = readsomething(ser,self.length)
+          #print(myByte)
+          #print(self.data)
           myByte = readsomething(ser,1)
           if len(myByte) >= 1 and myByte == 'E':
               # is  a valid message struct
               #new_values = unpack('ffffffhhhhhhhhhh', data)
               new_values = unpack(self.mapping, self.data)
-              #print new_values
+              print new_values
               self.sensors = new_values
               #self.f.write( str(new_values[0]) + ' ' + str(new_values[1]) + ' ' + str(new_values[2]) + ' ' + str(new_values[3]) + ' ' + str(new_values[4]) + ' ' + str(new_values[5]) + ' ' + str(new_values[6]) + ' ' + str(new_values[7]) + ' ' + str(new_values[8]) + ' ' + str(new_values[9]) + ' ' + str(new_values[10]) + ' ' + str(new_values[11]) + ' ' + str(new_values[12]) + ' ' +  str(new_values[13]) + ' ' + str(new_values[14]) + '\n')
               self.f.write(' '.join(map(str, new_values)) + '\n')
@@ -141,11 +144,17 @@ class Sensorimotor:
         self.start()
 
 if __name__ == "__main__":
-    [smnr, mtrn] = prop.serialcomm()
+    [ssmr, mtrn] = prop.serialcomm('/dev/cu.usbmodem1411')
 
-    sensorimotor = Sensorimotor()
+    # Weird, long values (4) should go first.
+    sensorimotor = Sensorimotor('sensorimotor',36,'iiihhhhhhhhhhhh')
+    sensorimotor.ip = sys.argv[1]
     sensorimotor.start()
-    sensorimotor.cleanbuffer(smnr)
+    sensorimotor.cleanbuffer(ssmr)
+
 
     while True:
-        sensorimotor.sendsensorsample(smnr)
+        sens = sensorimotor.picksensorsample(ssmr)
+        mots = None
+        if (sens != None):
+            sensorimotor.send(sensorimotor.data)

@@ -72,6 +72,14 @@ void transmitsensors() {
   char aux[len];  //36
   memcpy(&aux, &sensor, len);
 
+  if (debug)
+  {
+    Serial.print("Len:");Serial.println(len);
+    Serial.print("Int:");Serial.println(sizeof(int));
+    Serial.print("Long:");Serial.println(sizeof(long));
+    Serial.print("int16_t");Serial.println(sizeof(int16_t));
+  }
+
   Serial.write('S');
   Serial.write((uint8_t *)&aux, len);
   Serial.write('E');
