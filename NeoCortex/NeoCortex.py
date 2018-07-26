@@ -210,8 +210,8 @@ while(True):
             sens = sensorimotor.picksensorsample(ssmr)
             mots = None
 
-            if (sens != None and mots != None):
-                sensorimotor.send(sensorimotor.data+motorneuron.data)
+            if (sens != None):
+                sensorimotor.send(sensorimotor.data)
 
             if (sens != None and target != None):
                 if (target[0] == 0):
@@ -264,7 +264,9 @@ while(True):
         elif (data=='H'):
             ssmr.write('=')
         elif (data==','):
-            speed = 250
+            speed = speed + 50
+            if (speed>250):
+                speed = 250
         elif (data=='.'):
             speed = 50
         elif (data=='{'):
@@ -291,7 +293,7 @@ while(True):
             # Nose up
             visualpos[2]=visualpos[2]+1;
             ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
-        elif (data=='<'):
+        elif (data=='X'):
             break
     except Exception as e:
         print "Error:" + e.message
