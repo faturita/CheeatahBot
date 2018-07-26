@@ -144,7 +144,7 @@ class Sensorimotor:
         self.start()
 
 if __name__ == "__main__":
-    [ssmr, mtrn] = prop.serialcomm('/dev/cu.usbmodem1411')
+    [ssmr, mtrn] = prop.serialcomm()
 
     # Weird, long values (4) should go first.
     sensorimotor = Sensorimotor('sensorimotor',36,'iiihhhhhhhhhhhh')
