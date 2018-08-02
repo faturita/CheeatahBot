@@ -297,6 +297,10 @@ while(True):
             ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
         elif (data=='O'):
             ssmr.write('O')
+        elif (data=='('):
+            sensorimotor.sensorlocalburst = 100
+        elif (data==')'):
+            sensorimotor.sensorlocalburst = 10000
         elif (data=='X'):
             break
     except Exception as e:
