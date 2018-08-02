@@ -295,7 +295,7 @@ while(True):
             # Nose up
             visualpos[2]=visualpos[2]+1;
             ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
-        elif (data=='O')
+        elif (data=='O'):
             ssmr.write('O')
         elif (data=='X'):
             break
