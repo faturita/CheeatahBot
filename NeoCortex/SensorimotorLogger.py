@@ -75,6 +75,8 @@ class Sensorimotor:
         self.data = None
         self.length = length
         self.mapping = mapping
+        self.sensorlocalburst=10000
+        self.sensorburst=1
 
     def start(self):
         # Sensor Recording
@@ -102,6 +104,7 @@ class Sensorimotor:
         buf = ser.readline()
         print str(buf)
 
+        ser.write('AB'+'{:3d}'.format(self.sensorburst))
         # Reactive sensor information
         ser.write('S')
 
@@ -113,7 +116,7 @@ class Sensorimotor:
     def picksensorsample(self, ser):
         # read  Embed this in a loop.
         self.counter=self.counter+1
-        if (self.counter>100):
+        if (self.counter>=self.sensorlocalburst):
             ser.write('P')
             ser.write('S')
             self.counter=0
@@ -144,7 +147,7 @@ class Sensorimotor:
         self.start()
 
 if __name__ == "__main__":
-    [ssmr, mtrn] = prop.serialcomm()
+    [ssmr, mtrn] = prop.serialcomm('/dev/cu.usbmodem1411')
 
     # Weird, long values (4) should go first.
     sensorimotor = Sensorimotor('sensorimotor',36,'iiihhhhhhhhhhhh')
@@ -156,5 +159,7 @@ if __name__ == "__main__":
     while True:
         sens = sensorimotor.picksensorsample(ssmr)
         mots = None
+        sensorimotor.sensorlocalburst=10000
+        sensorimotor.sensorburst=10
         if (sens != None):
             sensorimotor.send(sensorimotor.data)

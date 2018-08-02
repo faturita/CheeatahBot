@@ -260,6 +260,8 @@ while(True):
         elif (data=='D'):
             ssmr.write('A2'+'{:3d}'.format(speed))
         elif (data==' '):
+            if (speed>200):
+                ssmr.write('A3010')
             ssmr.write('A3000')
         elif (data=='H'):
             ssmr.write('=')
@@ -293,6 +295,8 @@ while(True):
             # Nose up
             visualpos[2]=visualpos[2]+1;
             ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
+        elif (data=='O')
+            ssmr.write('O')
         elif (data=='X'):
             break
     except Exception as e:

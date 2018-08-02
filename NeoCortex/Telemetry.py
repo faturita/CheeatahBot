@@ -117,8 +117,8 @@ while True:
           #print str(new_values[1]) + '\t' + str(new_values[2]) + '\t' + str(new_values[3])
           f.write( str(new_values[5]) + ' ' + str(new_values[6]) + ' ' + str(new_values[7]) + '\n')
 
-          x.append( float(new_values[0]))
-          y.append( float(new_values[1]))
+          x.append( float(new_values[6]))
+          y.append( float(new_values[7]))
           z.append( float(new_values[2]))
 
           plotx.append( plcounter )
