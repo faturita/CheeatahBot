@@ -9,7 +9,7 @@ import sys
 
 import Configuration as conf
 
-savevideo = False
+savevideo = True
 
 
 if (len(sys.argv)<2):
