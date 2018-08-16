@@ -76,7 +76,7 @@ print("Last ip used:"+lastip)
 if (len(sys.argv)<2):
     print "Waiting for Multicast Message"
     shinkeybotip = reporter.receive()
-    print 'ShinkeyBot IP:' + shinkeybotip
+    print 'Bot IP:' + shinkeybotip
     ip = shinkeybotip
 elif sys.argv[1] == '-f':
     print "Forcing IP Address"
@@ -119,7 +119,7 @@ while (True):
   sent = sock.sendto(data, server_address)
 
   if (data.startswith('!')):
-      print "Letting know CheaatahBot that I want streaming...."
+      print "Letting know Bot that I want streaming...."
 
   if (data.startswith('X')):
       break
