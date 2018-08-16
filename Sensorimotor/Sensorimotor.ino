@@ -148,9 +148,11 @@ void doEncoder2()
 
 
 struct sensortype {
+  long encoder1; // 4
+  long encoder2; // 4 
+  long distance; // 4 
   int counter; // 2
   int armencoder; // 2
-  long distance; // 4
   int16_t acx;    // 2
   int16_t acy;    // 2
   int16_t acz;    // 2
@@ -158,8 +160,6 @@ struct sensortype {
   int16_t gx;    // 2
   int16_t gy;    // 2
   int16_t gz;    // 2
-  long encoder1; // 4
-  long encoder2; // 4
   int pan;        // 2
   int scan;       // 2
   int fps;        // 2
@@ -175,8 +175,10 @@ int oldcurrentpos=0;
 
 void setTargetPos(int newtargetpos)
 {
+
   targetpos = newtargetpos;
   TORQUE=1;
+
 }
 
 int increaseTorque()
@@ -188,9 +190,14 @@ int increaseTorque()
 
 bool updatedc(Adafruit_DCMotor *dcmotor, int currentpos)
 { 
+  int torq=0;
+
+  if (targetpos < currentpos) torq=130;
+  if (targetpos > currentpos) torq=50;
+  
   if (targetpos != currentpos)
   {
-    dcmotor->setSpeed(increaseTorque());
+    dcmotor->setSpeed(torq);
 
     if (targetpos < currentpos)
       dcmotor->run(BACKWARD);
@@ -206,8 +213,6 @@ bool updatedc(Adafruit_DCMotor *dcmotor, int currentpos)
 
 }
 
-
-
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // Or, create it with a different I2C address (say for stacking)
@@ -216,12 +221,12 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // Select which 'port' M1, M2, M3 or M4. In this case, M1
 Adafruit_DCMotor *myMotor1 = AFMS.getMotor(1);
 Adafruit_DCMotor *myMotor2 = AFMS.getMotor(2);
-Adafruit_DCMotor *myMotor3 = AFMS.getMotor(3);
+Adafruit_DCMotor *elbowMotor = AFMS.getMotor(3);
 Adafruit_DCMotor *myMotor4 = AFMS.getMotor(4);
 // You can also make another motor on port M2
 //Adafruit_DCMotor *myOtherMotor = AFMS.getMotor(2);
 
-void setupencoder()
+void setupMotorEncoders()
 {
   motorencoder2.setpins(encoder2PinA, encoder2PinB);
   motorencoder2.setup();  
@@ -232,21 +237,7 @@ void setupencoder()
   attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder2, RISING);  // encoDER ON PIN 2  
 }
 
-void loopencoder()
-{
-  motorencoder1.loop();
-  //motorencoder1.vel = motorencoder1.vel / 78.0;
-  motorencoder2.loop();
-  //motorencoder2.vel = motorencoder2.vel / 324.03;
-  Serial.print( motorencoder1.vel  );
-  Serial.print(' ');
-  Serial.println(motorencoder2.vel ) ;
-  delay(250);
-}
-
-
-
-void setup() {
+void setup1() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
   Serial.println("CheeatahBot Baby Monitor");
 
@@ -264,33 +255,38 @@ void setup() {
   // turn on motor
   myMotor2->run(RELEASE);
 
-  myMotor3->setSpeed(1);
-  myMotor3->run(FORWARD);
+  elbowMotor->setSpeed(1);
+  elbowMotor->run(FORWARD);
   // turn on motor
-  myMotor3->run(RELEASE);
+  elbowMotor->run(RELEASE);
 
- /**
-    myMotor4->setSpeed(150);
-    myMotor4->run(FORWARD);
-    // turn on motor
-    myMotor4->run(RELEASE);
-  **/
-
-  setupencoder();
+  //setupencoder();
   setupEncoder();
   setupUltraSensor();
   setupSuperSensor();
 
   scanner.servo.attach(10);
-  scanner.pos=60;
-  scanner.tgtPos=60; 
+  scanner.pos=0;
+  scanner.tgtPos=90; 
 
   pan.servo.attach(9);
-  pan.pos = 60;
+  pan.pos = 0;
   pan.tgtPos = 60;// 57 is center
 
   setTargetPos(0);
   
+}
+
+void loopEncoders()
+{
+  motorencoder1.loop();
+  //motorencoder1.vel = motorencoder1.vel / 78.0;
+  motorencoder2.loop();
+  //motorencoder2.vel = motorencoder2.vel / 324.03;
+  Serial.print( motorencoder1.vel  );
+  Serial.print(' ');
+  Serial.println(motorencoder2.vel ) ;
+  delay(250);
 }
 
 void domotor(Adafruit_DCMotor *myMotor, int spd, int dir) {
@@ -303,10 +299,16 @@ void StateMachine(int state, int controlvalue)
   switch (state)
   {
     case 1:
+      // Right
       myMotor1->setSpeed(controlvalue);
       myMotor1->run(FORWARD);
+      myMotor2->setSpeed(controlvalue);
+      myMotor2->run(BACKWARD); 
       break;
     case 2:
+      // Left
+      myMotor1->setSpeed(controlvalue);
+      myMotor1->run(BACKWARD);
       myMotor2->setSpeed(controlvalue);
       myMotor2->run(FORWARD);
       break;
@@ -342,7 +344,15 @@ void StateMachine(int state, int controlvalue)
       pan.tgtPos = controlvalue;
       break;
     case 9:
-      scanner.tgtPos = controlvalue;   
+      scanner.tgtPos = controlvalue;  
+      break;
+    case 0x0a:
+      myMotor1->run(RELEASE);
+      myMotor2->run(RELEASE);
+      elbowMotor->run(RELEASE);
+      resetEncoderPos();
+      targetpos=0; 
+      break;
     default:
       // Do Nothing
       state = 0;
@@ -351,10 +361,7 @@ void StateMachine(int state, int controlvalue)
   }  
 }
 
-int speed=0;
-int direction=1;
-
-void loop()
+void loop1()
 {
   int state,controlvalue;
   
@@ -367,36 +374,7 @@ void loop()
   
   //domotor(myMotor2, speed, FORWARD);
   //domotor(myMotor1, speed, FORWARD);
-  updatedc(myMotor3, getEncoderPos());
-
-  speed = speed + direction*1;
-
-  if (speed>120)
-    direction=-1;
-
-  if (speed<=5)
-    direction=1;
-
-  /**
-    int spd=0;
-    for (spd=0;spd<255;spd++)
-    {
-    domotor(myMotor1,spd,FORWARD);
-    domotor(myMotor2,spd,FORWARD);
-    }
-
-    delay(1000);
-    domotor(myMotor1,0,RELEASE);
-    domotor(myMotor2,0,RELEASE);
-
-    for (spd=0;spd<255;spd++)
-    {
-    domotor(myMotor1,spd,BACKWARD);
-    domotor(myMotor2,spd,BACKWARD);
-    }
-    delay(1000);
-    domotor(myMotor1,0,RELEASE);
-    domotor(myMotor2,0,RELEASE);**/
+  updatedc(elbowMotor, getEncoderPos());
 
   //loopencoder();
 
@@ -412,10 +390,84 @@ void loop()
   StateMachine(state,controlvalue);
 
   //delay(250);
-
 }
 
 
+
+
+
+void setup() {
+  Serial.begin(9600);           // set up Serial library at 9600 bps
+  Serial.println("CheeatahBot Baby Monitor");
+
+  AFMS.begin();  // create with the default frequency 1.6KHz
+  //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
+
+  // Set the speed to start, from 0 (off) to 255 (max speed)
+  myMotor1->setSpeed(1);
+  myMotor1->run(FORWARD);
+  // turn on motor
+  myMotor1->run(RELEASE);
+
+  myMotor2->setSpeed(1);
+  myMotor2->run(FORWARD);
+  // turn on motor
+  myMotor2->run(RELEASE);
+
+  elbowMotor->setSpeed(1);
+  elbowMotor->run(FORWARD);
+  // turn on motor
+  elbowMotor->run(RELEASE);
+
+  //setupMotorEncoders();
+  setupEncoder();
+  //setupUltraSensor();
+  setupSuperSensor();
+
+  scanner.servo.attach(10);
+  scanner.pos=0;
+  scanner.tgtPos=90; 
+
+  pan.servo.attach(9);
+  pan.pos = 0;
+  pan.tgtPos = 60;// 57 is center
+
+  setTargetPos(0);
+  
+}
+
+void loop()
+{
+  int state,controlvalue;
+  
+  sensor.fps = fps();
+
+  parseCommand(state,controlvalue);
+  
+  updateEncoder();
+  sensor.armencoder = getEncoderPos();
+  
+  updatedc(elbowMotor, getEncoderPos());
+
+  //loopEncoders();
+
+  //updateUltraSensor();
+  if (checksensors())
+  {
+    updateSuperSensor();
+    updateUltraSensor();
+  }
+  burstsensors();
+
+  pan.update();
+  sensor.pan = pan.pos;
+  scanner.update();
+  sensor.scan = scanner.pos;
+
+  StateMachine(state,controlvalue);
+
+  //delay(250);
+}
 
 
 

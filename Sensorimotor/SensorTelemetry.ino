@@ -26,8 +26,10 @@ int fps()
   return freqValue;
 }
 
+bool sensorburst = false;
+int sampleCounter = 0;
 
-void checksensors()
+bool checksensors()
 {
   static int counter = 0;
   if (counter >= 255)
@@ -35,11 +37,10 @@ void checksensors()
     counter = 0;
   }
   sensor.counter = counter++;
+  return (sensorburst);
 
 }
 
-bool sensorburst = false;
-int sampleCounter = 0;
 
 void burstsensors() {
   if (sensorburst)
@@ -70,6 +71,14 @@ void transmitsensors() {
   int len = sizeof(sensor);
   char aux[len];  //36
   memcpy(&aux, &sensor, len);
+
+  if (debug)
+  {
+    Serial.print("Len:");Serial.println(len);
+    Serial.print("Int:");Serial.println(sizeof(int));
+    Serial.print("Long:");Serial.println(sizeof(long));
+    Serial.print("int16_t");Serial.println(sizeof(int16_t));
+  }
 
   Serial.write('S');
   Serial.write((uint8_t *)&aux, len);

@@ -144,10 +144,10 @@ visualpos = [60,150,90]
 
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
 #  sent to listening servers.
-sensesensor = True
+sensesensor = False
 
 # Connect remotely to any client that is waiting for sensor loggers.
-sensorimotor = senso.Sensorimotor('sensorimotor',36,'hhfhhhhhhhffhhh')
+sensorimotor = senso.Sensorimotor('sensorimotor',36,'fffhhhhhhhhhhhh')
 sensorimotor.start()
 sensorimotor.cleanbuffer(ssmr)
 
@@ -188,6 +188,8 @@ sur = Surrogator(sock)
 
 target = [0,0,0]
 automode = False;
+
+speed=50
 
 fps = Fps()
 fps.tic()
@@ -250,15 +252,25 @@ while(True):
             # Automode
             automode = (not automode)
         elif (data=='W'):
-            ssmr.write('A3050')
+            ssmr.write('A3'+'{:3d}'.format(speed))
         elif (data=='S'):
-            ssmr.write('A4050')
+            ssmr.write('A4'+'{:3d}'.format(speed))
         elif (data=='A'):
-            ssmr.write('A1050')
+            ssmr.write('A1'+'{:3d}'.format(speed))
         elif (data=='D'):
-            ssmr.write('A2050')
+            ssmr.write('A2'+'{:3d}'.format(speed))
         elif (data==' '):
+            if (speed>200):
+                ssmr.write('A3010')
             ssmr.write('A3000')
+        elif (data=='H'):
+            ssmr.write('=')
+        elif (data==','):
+            speed = speed + 50
+            if (speed>250):
+                speed = 250
+        elif (data=='.'):
+            speed = 50
         elif (data=='{'):
             # Camera left
             visualpos[0]=visualpos[0]+1;
@@ -283,7 +295,13 @@ while(True):
             # Nose up
             visualpos[2]=visualpos[2]+1;
             ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
-        elif (data=='<'):
+        elif (data=='O'):
+            ssmr.write('O')
+        elif (data=='('):
+            sensorimotor.sensorlocalburst = 100
+        elif (data==')'):
+            sensorimotor.sensorlocalburst = 10000
+        elif (data=='X'):
             break
     except Exception as e:
         print "Error:" + e.message
