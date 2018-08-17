@@ -28,6 +28,12 @@ int fps()
 
 bool sensorburst = false;
 int sampleCounter = 0;
+int burstsize = MAX_SIZE_SENSOR_BURST;
+
+void setBurstSize(int pburstsize)
+{
+  burstsize = pburstsize;
+}
 
 bool checksensors()
 {
@@ -47,7 +53,7 @@ void burstsensors() {
   {
     transmitsensors();
     sampleCounter++;
-    if (sampleCounter > MAX_SIZE_SENSOR_BURST)
+    if (sampleCounter >= burstsize || sampleCounter >= MAX_SIZE_SENSOR_BURST)
     {
       sensorburst = false;
       sampleCounter = 0;
@@ -75,6 +81,7 @@ void transmitsensors() {
   if (debug)
   {
     Serial.print("Len:");Serial.println(len);
+    Serial.print("Counter:");Serial.println(sensor.counter);
     Serial.print("Int:");Serial.println(sizeof(int));
     Serial.print("Long:");Serial.println(sizeof(long));
     Serial.print("int16_t");Serial.println(sizeof(int16_t));

@@ -260,7 +260,7 @@ void setup1() {
   // turn on motor
   elbowMotor->run(RELEASE);
 
-  //setupencoder();
+  //setupMotorEncoders();
   setupEncoder();
   setupUltraSensor();
   setupSuperSensor();
@@ -292,6 +292,60 @@ void loopEncoders()
 void domotor(Adafruit_DCMotor *myMotor, int spd, int dir) {
   myMotor->setSpeed(spd);
   myMotor->run(dir);
+}
+
+
+bool doscan = false;
+int scanstate = 0;
+int scancounter=0;
+
+void setDoScan()
+{
+  doscan = !doscan;  
+}
+
+void scan()
+{
+  if (doscan)
+  {
+    if (scancounter>500)
+    {
+      if (sensor.fps > 30)
+      {
+        updateUltraSensor();
+      } 
+    }
+    if (scancounter++>1000)
+    {
+      switch (scanstate)
+      {
+        case 0:
+          scanner.tgtPos = 30;
+          scanstate=1;
+          scancounter=0;
+          break;
+        case 1:
+          scanner.tgtPos = 90;
+          scanstate=2;
+          scancounter=0;
+          break;
+        case 2:
+          scanner.tgtPos = 160;
+          scanstate=3;
+          scancounter=0;
+          break;
+        case 3:
+          scanner.tgtPos = 90;
+          scanstate=0;
+          scancounter=0;
+          break;
+        default:
+          scanstate=0;
+          scancounter=0;
+      }     
+    }
+  }
+  
 }
 
 void StateMachine(int state, int controlvalue)
@@ -353,6 +407,10 @@ void StateMachine(int state, int controlvalue)
       resetEncoderPos();
       targetpos=0; 
       break;
+    case 0x0b:
+      setBurstSize(controlvalue);
+      state = 0;
+      break;
     default:
       // Do Nothing
       state = 0;
@@ -361,36 +419,36 @@ void StateMachine(int state, int controlvalue)
   }  
 }
 
-void loop1()
-{
-  int state,controlvalue;
-  
-  sensor.fps = fps();
-
-  parseCommand(state,controlvalue);
-  
-  updateEncoder();
-  sensor.armencoder = getEncoderPos();
-  
-  //domotor(myMotor2, speed, FORWARD);
-  //domotor(myMotor1, speed, FORWARD);
-  updatedc(elbowMotor, getEncoderPos());
-
-  //loopencoder();
-
-  checksensors();
-  //updateUltraSensor();
-  updateSuperSensor();
-
-  pan.update();
-  sensor.pan = pan.pos;
-  scanner.update();
-  sensor.scan = scanner.pos;
-
-  StateMachine(state,controlvalue);
-
-  //delay(250);
-}
+//void loop1()
+//{
+//  int state,controlvalue;
+//  
+//  sensor.fps = fps();
+//
+//  parseCommand(state,controlvalue);
+//  
+//  updateEncoder();
+//  sensor.armencoder = getEncoderPos();
+//  
+//  //domotor(myMotor2, speed, FORWARD);
+//  //domotor(myMotor1, speed, FORWARD);
+//  updatedc(elbowMotor, getEncoderPos());
+//
+//  //loopencoder();
+//
+//  checksensors();
+//  //updateUltraSensor();
+//  updateSuperSensor();
+//
+//  pan.update();
+//  sensor.pan = pan.pos;
+//  scanner.update();
+//  sensor.scan = scanner.pos;
+//
+//  StateMachine(state,controlvalue);
+//
+//  //delay(250);
+//}
 
 
 
@@ -455,9 +513,10 @@ void loop()
   if (checksensors())
   {
     updateSuperSensor();
-    updateUltraSensor();
   }
   burstsensors();
+
+  scan();
 
   pan.update();
   sensor.pan = pan.pos;

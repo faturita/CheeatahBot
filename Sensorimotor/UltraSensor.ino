@@ -28,7 +28,7 @@ inline void  updateUltraSensor() {
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(5); // Added this line
   digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH);
+  duration = pulseIn(echoPin, HIGH); /// Added timeout.
   distance = (duration/2) / 29.1;
 
   if (distance < 4) {  // This is where the LED On/Off happens

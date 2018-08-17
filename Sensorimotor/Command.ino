@@ -78,6 +78,9 @@ void parseCommand(int &state, int &controlvalue)
       case 'A':
         readcommand(state,controlvalue);
         break;
+      case 'O':
+        setDoScan();
+        break;
       default:
         break;
     }
