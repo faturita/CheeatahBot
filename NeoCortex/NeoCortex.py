@@ -71,8 +71,8 @@ while (True):
     # Analyze incoming data...
     data = ''
 
-    distance = new_values[13]
-    angle = new_values[2]
+    distance = new_values[2]
+    angle = new_values[13]
 
     if (angle<85 and distance>0):
         dst[0] = distance
@@ -85,21 +85,19 @@ while (True):
         print dst
 
     if (state == 0):
-        sendmulticommand('<',30)
-        state = 1
+        sendmulticommand('<',4)
+
+        if (angle<40):
+            state = 1
     elif (state == 1):
         sendmulticommand('K',5)
         state = 2
     elif (state == 2):
-        sendmulticommand('>',30)
-        state = 3
+        sendmulticommand('>',4)
+
+        if (angle>120):
+            state = 3
     elif (state == 3):
-        sendmulticommand('K',5)
-        state = 4
-    elif (state == 4):
-        sendmulticommand('>',30)
-        state = 5
-    elif (state == 5):
         sendmulticommand('K',5)
         state = 0
 

@@ -69,9 +69,16 @@ def _find_getch():
 
 getch = _find_getch()
 
+print('Press X to stop Bot')
+print('Press x to exit this controller')
+
 while (True):
   print '>'
   data = getch()
+
+  if (data.startswith('x')):
+      sock.close()
+      quit()
 
   sent = sock.sendto(data, server_address)
 
