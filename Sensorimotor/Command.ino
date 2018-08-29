@@ -67,8 +67,11 @@ void parseCommand(int &state, int &controlvalue)
         Serial.print(sensor.acx);Serial.print(":");Serial.print(sensor.acy);Serial.print(",");Serial.print(sensor.acz);Serial.print(",");Serial.print(sensor.distance);Serial.println();
         break;
       case '=':
-        resetEncoderPos();
-        setTargetPos(0);
+        homing = 1;
+        homingcounter=0;
+        //setTargetPos(200-150);
+        //resetEncoderPos();
+        //setTargetPos(0);
         state=0;
         //setTargetPos(90/10);
         //elbow.tgtPos=90;
