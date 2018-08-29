@@ -9,32 +9,16 @@ import sys
 
 import Configuration as conf
 
-import ConfigParser
+import ConfigMe
 import io
 
 import os
 
 savevideo = True
 
-def readconfig(configfile_name):
-    with open(configfile_name) as f:
-        sample_config = f.read()
-    config = ConfigParser.RawConfigParser(allow_no_value=True)
-    config.readfp(io.BytesIO(sample_config))
-
-    #print("List all contents")
-    for section in config.sections():
-        #print("Section: %s" % section)
-        for options in config.options(section):
-            #print("x %s:::%s:::%s" % (options,
-            #                  config.get(section, options),
-            #                  str(type(options))))
-            if (options == 'ip'):
-                return config.get(section, options)
-
 if (len(sys.argv)<2):
 	# Load the configuration file
-	ip = readconfig("config.ini")
+	ip = ConfigMe.readconfig("config.ini")
 	port = conf.videoport
 
 elif sys.argv[1] == '-f':

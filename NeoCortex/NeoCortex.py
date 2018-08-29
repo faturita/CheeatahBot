@@ -9,8 +9,7 @@ import time
 import MCast
 
 import Configuration
-import ConfigParser
-import io
+import ConfigMe
 
 import os
 
@@ -30,7 +29,8 @@ unpackcode = 'iiihhhhhhhhhhhh'
 
 sockcmd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-server_address = ('10.17.64.215', Configuration.controlport)
+lastip = ConfigMe.readconfig("config.ini")
+server_address = (lastip, Configuration.controlport)
 
 # Let the Brainstem release the robot.
 for i in range(1,100):
