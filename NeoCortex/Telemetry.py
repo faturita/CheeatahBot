@@ -117,13 +117,14 @@ while True:
           #print str(new_values[1]) + '\t' + str(new_values[2]) + '\t' + str(new_values[3])
           f.write( str(new_values[5]) + ' ' + str(new_values[6]) + ' ' + str(new_values[7]) + '\n')
 
-          x.append( float(new_values[5]-14000))
-          y.append( float(new_values[6]))
-          z.append( float(new_values[7]))
+          #x.append( float(new_values[5]-14000))
+          #y.append( float(new_values[6]))
+          #z.append( float(new_values[7]))
 
-          #x.append( float(new_values[2]))
-          #y.append( float(new_values[13]))
-          #z.append( float(0))
+          # SCAN
+          x.append( float(new_values[2]))
+          y.append( float(new_values[13]))
+          z.append( float(0))
 
           #x.append( float(new_values[9]))
           #y.append( float(new_values[10]))

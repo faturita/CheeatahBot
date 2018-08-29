@@ -164,6 +164,24 @@ class Surrogator:
     def getdata(self):
         return self.data
 
+    def getcommand(self,length):
+        self.data = ''
+        data = ''
+        max=100000
+        retrycounter=0
+        try:
+            while (retrycounter<max):
+                # Read from the UDP controller socket non blocking
+                data, self.address = self.sock.recvfrom(length)
+                if (len(data)>0):
+                    self.data = self.data + data
+
+                if (len(self.data)>=length):
+                    return self.data
+        except Exception as e:
+            pass
+        return self.data
+
     def getcommand(self):
         self.data = ''
         try:
@@ -244,11 +262,13 @@ while(True):
             # Vst VideoStream should be likely restarted in order to check
             # if something else can be enabled.
 
-
+        if (data==':'):
+            cmd = sur.getcommand(5)
+            ssmr.write(cmd)
         if (data == 'Q'):
             # Activate/Deactivate sensor data.
             sensesensor = (not sensesensor)
-        if (data == 'K'):
+        if (data == 'k'):
             # Automode
             automode = (not automode)
         elif (data=='W'):
@@ -294,6 +314,8 @@ while(True):
             # Nose up
             visualpos[2]=visualpos[2]+1;
             ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
+        elif (data=='K'):
+            ssmr.write('K')
         elif (data=='O'):
             ssmr.write('O')
         elif (data=='('):
