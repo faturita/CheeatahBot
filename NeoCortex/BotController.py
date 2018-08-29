@@ -80,7 +80,7 @@ if (len(sys.argv)<2):
     ip = shinkeybotip
 elif sys.argv[1] == '-f':
     print "Forcing IP Address"
-    ip = '192.168.0.110'
+    ip = lastip
 else:
     ip = sys.argv[1]
     print "Using IP:"+ip

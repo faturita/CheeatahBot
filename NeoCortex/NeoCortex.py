@@ -3,7 +3,6 @@ import numpy as np
 import cv2
 
 import socket
-import sys
 
 import time
 
@@ -14,6 +13,11 @@ import ConfigParser
 import io
 
 import os
+
+import datetime
+from struct import *
+
+import sys, select
 
 
 socktelemetry = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -40,8 +44,9 @@ for i in range(1,2):
 
 sent = sockcmd.sendto('Q', server_address)
 
+print '>'
+
 while (True):
-    print '>'
 
     data, address = socktelemetry.recvfrom(length)
     myByte = 'E'
