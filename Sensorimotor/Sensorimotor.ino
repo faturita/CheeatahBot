@@ -13,6 +13,12 @@
      A - Digital Pin 2
      B - Digital Pin 4
 
+
+     Tilt sensor
+     G - GND
+     R - VCC
+     Y - Signal - 8
+
      With this configuration it will work.  If you turn the motor
      you need to change the sign of the encoder counter on the
      Decoder function that is being callled at each interrupt.
@@ -294,10 +300,24 @@ void domotor(Adafruit_DCMotor *myMotor, int spd, int dir) {
   myMotor->run(dir);
 }
 
+const int TILT_PIN = 8;
+
+bool checktilted()
+{
+  int tiltVal = digitalRead(TILT_PIN);
+  if (tiltVal == HIGH) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// Scanner =======
 
 bool doscan = false;
 int scanstate = 0;
 int scancounter=0;
+int scanvalues[4];
 
 void setDoScan()
 {
@@ -313,6 +333,7 @@ void scan()
       if (sensor.fps > 30)
       {
         updateUltraSensor();
+        scanvalues[scanstate] = sensor.distance;
       } 
     }
     if (scancounter++>1000)
@@ -450,7 +471,49 @@ void StateMachine(int state, int controlvalue)
 //  //delay(250);
 //}
 
+int homingcounter=0;
+int homing=0;
 
+void doHome()
+{
+  if (homing>0)
+    homingcounter++;
+    
+  switch(homing)
+  {
+    case 0:
+      break;
+    case 1:
+      if (homingcounter>120)
+      {
+        setTargetPos(200-150);
+        homing=2;       
+      }
+      break;
+     case 2:
+      if (homingcounter>450)
+      {
+        resetEncoderPos();
+        setTargetPos(10-150);
+        homing=3;
+      }
+      break;
+     case 3:
+      if (homingcounter>490)
+      {
+        if (!checktilted())
+        {
+          resetEncoderPos();
+          setTargetPos(0);
+          homingcounter=0;
+          homing=0;
+        }        
+      }
+      break;
+    default:
+      break;
+  }
+}
 
 
 
@@ -491,12 +554,21 @@ void setup() {
   pan.tgtPos = 60;// 57 is center
 
   setTargetPos(0);
+
   
+  pinMode(TILT_PIN, INPUT);
 }
+
+unsigned long previousMillis = 0;        // will store last time LED was updated
+
+// duration of movement.
+long interval = 2000;           // interval of duration of movement
+
 
 void loop()
 {
   int state,controlvalue;
+  unsigned long currentMillis = millis();
   
   sensor.fps = fps();
 
@@ -508,6 +580,36 @@ void loop()
   updatedc(elbowMotor, getEncoderPos());
 
   //loopEncoders();
+//  if (currentMillis - previousMillis >= interval) {
+//    // save the last time you blinked the LED
+//    previousMillis = currentMillis;
+//
+//    Serial.println( scancounter );
+//    Serial.println( state );
+//
+//    if (state != 0)
+//    {
+//      Serial.println("STop");
+//      scancounter=1;
+//      setDoScan();
+//    } else if (scancounter>0) {
+//      if (scanvalues[1] > scanvalues[0] && scanvalues[1] > scanvalues[3])
+//        {
+//          Serial.println("LEft");
+//        }
+//    
+//    
+//      if (scanvalues[3] > scanvalues[0] && scanvalues[3] > scanvalues[1])
+//        {
+//          Serial.println("Right");
+//        }
+//
+//      if (scanvalues[0] > scanvalues[1] && scanvalues[0] > scanvalues[3])
+//        {
+//          Serial.println("Ahead");
+//        }
+//    }
+//  }
 
   //updateUltraSensor();
   if (checksensors())
@@ -517,6 +619,7 @@ void loop()
   burstsensors();
 
   scan();
+  doHome();
 
   pan.update();
   sensor.pan = pan.pos;
