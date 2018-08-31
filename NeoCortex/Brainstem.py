@@ -255,9 +255,12 @@ while(True):
             # Vst VideoStream should be likely restarted in order to check
             # if something else can be enabled.
 
-        if (data==':'):
-            cmd = sur.getlengthycommand(5)
-            ssmr.write(cmd)
+        if (data=='1'):
+            ssmr.write('A9028')
+        elif (data=='2'):
+            ssmr.write('A9090')
+        elif (data=='3'):
+            ssmr.write('A9170')
         if (data == 'Q'):
             # Activate/Deactivate sensor data.
             sensesensor = (not sensesensor)
