@@ -173,9 +173,6 @@ class Surrogator:
             while (retrycounter<max):
                 # Read from the UDP controller socket non blocking
                 data, self.address = self.sock.recvfrom(length)
-                print data
-                if (len(data)>0):
-                    self.data = str(self.data) + str(data)
 
                 if (len(self.data)>=length):
                     print self.data
