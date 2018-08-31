@@ -166,20 +166,14 @@ class Surrogator:
 
     def getlengthycommand(self,length):
         self.data = ''
-        data = ''
-        max=100000
-        retrycounter=0
         try:
-            while (retrycounter<max):
-                # Read from the UDP controller socket non blocking
-                data, self.address = self.sock.recvfrom(length)
-
-                if (len(self.data)>=length):
-                    print self.data
-                    return self.data
+            # Read from the UDP controller socket non blocking
+            self.data, self.address = self.sock.recvfrom(length)
         except Exception as e:
-            print('Error')
+            pass
+
         return self.data
+
 
     def getcommand(self):
         self.data = ''
