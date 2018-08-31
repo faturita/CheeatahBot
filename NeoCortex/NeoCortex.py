@@ -19,6 +19,18 @@ from struct import *
 import sys, select
 
 
+class Asynctimer:
+    def set(self,delay):
+        self.delay = delay
+        self.counter = 0
+    def check(self):
+        self.counter = self.counter + 1
+        if (self.counter>self.delay):
+            return True
+        else:
+            return False
+
+
 socktelemetry = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 svaddress = ('0.0.0.0', Configuration.telemetryport)
 print >> sys.stderr, 'starting up on %s port %s', svaddress
@@ -57,6 +69,10 @@ state = 0
 
 dst = [0,0,0]
 
+t = Asynctimer()
+t.set(10)
+delay=10
+
 while (True):
 
     data, address = socktelemetry.recvfrom(length)
@@ -74,34 +90,90 @@ while (True):
     distance = new_values[2]
     angle = new_values[13]
 
-    if (angle<85 and distance>0):
+    print (distance)
+    print (angle)
+
+    if (angle==10 and distance>0):
         dst[0] = distance
-    elif ((angle>85 or angle<95) and distance>0):
+    elif ((angle>=85 and angle<=95) and distance>0):
         dst[1] = distance
-    elif (angle>95 and distance>0):
+    elif (angle>115 and distance>0):
         dst[2] = distance
 
-    if (dst[0]>0 and dst[1]>0 and dst[2]>0):
-        print dst
+    print dst
 
-    if (state == 0):
-        sendmulticommand('<',4)
+    if (state == 0 and t.check()):
+        sendmulticommand(':A9028',2)
 
-        if (angle<40):
+        if (angle<30):
             state = 1
-    elif (state == 1):
-        sendmulticommand('K',5)
+            t.set(delay)
+    elif (state == 1 and t.check()):
+        sendmulticommand('K',2)
         state = 2
-    elif (state == 2):
-        sendmulticommand('>',4)
+        t.set(delay)
+    elif (state == 2 and t.check()):
+        sendmulticommand(':A9090',2)
 
-        if (angle>120):
+        if (angle>=89 and angle<=91):
             state = 3
-    elif (state == 3):
-        sendmulticommand('K',5)
-        state = 0
+            t.set(delay)
+    elif (state == 3 and t.check()):
+        sendmulticommand('K',2)
+        state = 4
+        t.set(delay)
 
-    if (len(data)>0):
+    elif (state == 4 and t.check()):
+        sendmulticommand(':A9170',2)
+
+        if (angle>160):
+            state = 5
+            t.set(delay)
+    elif (state == 5 and t.check()):
+        sendmulticommand('K',2)
+        state = 0
+        t.set(delay)
+
+
+    # if (state == 0 and t.check()):
+    #     sendmulticommand('<',7)
+    #
+    #     if (angle<30):
+    #         state = 1
+    #         t.set(delay)
+    # elif (state == 1 and t.check()):
+    #     sendmulticommand('K',2)
+    #     state = 2
+    #     t.set(delay)
+    # elif (state == 2 and t.check()):
+    #     sendmulticommand('>',7)
+    #
+    #     if (angle<85):
+    #         sendmulticommand('>',2)
+    #
+    #     if (angle>95):
+    #         sendmulticommand('<',2)
+    #
+    #     if (angle>85 and angle<95):
+    #         state = 3
+    #         t.set(delay)
+    # elif (state == 3 and t.check()):
+    #     sendmulticommand('K',2)
+    #     state = 4
+    #     t.set(delay)
+    #
+    # elif (state == 4 and t.check()):
+    #     sendmulticommand('>',7)
+    #
+    #     if (angle>140):
+    #         state = 5
+    #         t.set(delay)
+    # elif (state == 5 and t.check()):
+    #     sendmulticommand('K',2)
+    #     state = 0
+    #     t.set(delay)
+
+    if (len(data)>0 and t.check()):
         # Determine action command and send it.
         sent = sockcmd.sendto(data, server_address)
 

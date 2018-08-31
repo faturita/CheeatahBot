@@ -164,7 +164,7 @@ class Surrogator:
     def getdata(self):
         return self.data
 
-    def getcommand(self,length):
+    def getlengthycommand(self,length):
         self.data = ''
         data = ''
         max=100000
@@ -174,7 +174,7 @@ class Surrogator:
                 # Read from the UDP controller socket non blocking
                 data, self.address = self.sock.recvfrom(length)
                 if (len(data)>0):
-                    self.data = self.data + data
+                    self.data = str(self.data) + str(data)
 
                 if (len(self.data)>=length):
                     return self.data
@@ -263,7 +263,7 @@ while(True):
             # if something else can be enabled.
 
         if (data==':'):
-            cmd = sur.getcommand(5)
+            cmd = sur.getlengthycommand(5)
             ssmr.write(cmd)
         if (data == 'Q'):
             # Activate/Deactivate sensor data.
