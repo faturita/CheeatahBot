@@ -103,7 +103,7 @@ while (True):
     print dst
 
     if (state == 0 and t.check()):
-        sendmulticommand(':A9028',2)
+        sendmulticommand('1',2)
 
         if (angle<30):
             state = 1
@@ -113,7 +113,7 @@ while (True):
         state = 2
         t.set(delay)
     elif (state == 2 and t.check()):
-        sendmulticommand(':A9090',2)
+        sendmulticommand('2',2)
 
         if (angle>=89 and angle<=91):
             state = 3
@@ -124,7 +124,7 @@ while (True):
         t.set(delay)
 
     elif (state == 4 and t.check()):
-        sendmulticommand(':A9170',2)
+        sendmulticommand('3',2)
 
         if (angle>160):
             state = 5

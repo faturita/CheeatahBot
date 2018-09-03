@@ -54,17 +54,18 @@ def get_ip_address(ifname):
         struct.pack('256s', ifname[:15])
     )[20:24])
 
+# Ok, so the first thing to do is to broadcast my own IP address.
+dobroadcastip = True
+dosomestreaming = True
 
 # Get PiCamera stream and read everything in another thread.
 vst = pcs.H264VideoStreamer()
-try:
-    vst.startAndConnect()
-    pass
-except:
-    pass
-
-# Ok, so the first thing to do is to broadcast my own IP address.
-dobroadcastip = True
+if (dosomestreaming):
+    try:
+        vst.startAndConnect()
+        pass
+    except:
+        pass
 
 # Initialize UDP Controller Server on port 10001 (ShinkeyBotController)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -280,6 +281,10 @@ while(True):
             ssmr.write('A3000')
         elif (data=='H'):
             ssmr.write('=')
+        elif (data==';'):
+            speed = speed - 50
+            if (speed<50):
+                speed = 50
         elif (data==','):
             speed = speed + 50
             if (speed>250):
