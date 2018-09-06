@@ -109,7 +109,7 @@ while (True):
             state = 1
             t.set(delay)
     elif (state == 1 and t.check()):
-        sendmulticommand('K',2)
+        sendmulticommand('K',10)
         state = 2
         t.set(delay)
     elif (state == 2 and t.check()):
@@ -119,7 +119,7 @@ while (True):
             state = 3
             t.set(delay)
     elif (state == 3 and t.check()):
-        sendmulticommand('K',2)
+        sendmulticommand('K',10)
         state = 4
         t.set(delay)
 
@@ -130,7 +130,7 @@ while (True):
             state = 5
             t.set(delay)
     elif (state == 5 and t.check()):
-        sendmulticommand('K',2)
+        sendmulticommand('K',10)
         state = 0
         t.set(delay)
 

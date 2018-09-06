@@ -264,7 +264,9 @@ while(True):
             ssmr.write('A9170')
         if (data == 'Q'):
             # Activate/Deactivate sensor data.
-            sensesensor = (not sensesensor)
+            sensesensor = True
+        elif (data == 'q'):
+            sensesensor = False
         if (data == 'k'):
             # Automode
             automode = (not automode)
