@@ -279,14 +279,16 @@ while(True):
         elif (data=='D'):
             ssmr.write('A2'+'{:3d}'.format(50))
         elif (data==' '):
-            ssmr.write('A3010')
-            ssmr.write('A3000')
+            if (speed<120):
+                ssmr.write('A3010')
+                ssmr.write('A3000')
         elif (data=='H'):
             ssmr.write('=')
         elif (data==';'):
             speed = speed - 50
             if (speed<50):
                 speed = 50
+            ssmr.write('A3'+'{:3d}'.format(speed))
         elif (data==','):
             speed = speed + 50
             if (speed>250):
