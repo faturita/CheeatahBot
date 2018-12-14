@@ -62,9 +62,11 @@ void parseCommand(int &state, int &controlvalue)
         Serial.println( sensor.armencoder );
         break;
       case 'U':
-        updateUltraSensor();
         updateSuperSensor();
         Serial.print(sensor.acx);Serial.print(":");Serial.print(sensor.acy);Serial.print(",");Serial.print(sensor.acz);Serial.print(",");Serial.print(sensor.distance);Serial.println();
+        break;
+      case 'K':
+        updateUltraSensor();
         break;
       case '=':
         homing = 1;

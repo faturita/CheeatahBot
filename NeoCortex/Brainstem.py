@@ -323,6 +323,8 @@ while(True):
             ssmr.write('K')
         elif (data=='O'):
             ssmr.write('O')
+        elif (data=='='):
+            ssmr.write('=')
         elif (data=='('):
             sensorimotor.sensorlocalburst = 100
         elif (data==')'):

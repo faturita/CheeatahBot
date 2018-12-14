@@ -266,7 +266,7 @@ void setup1() {
   // turn on motor
   elbowMotor->run(RELEASE);
 
-  //setupMotorEncoders();
+  setupMotorEncoders();
   setupEncoder();
   setupUltraSensor();
   setupSuperSensor();
@@ -515,7 +515,8 @@ void doHome()
   }
 }
 
-
+#define trigPin 6
+#define echoPin 7
 
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
@@ -557,6 +558,9 @@ void setup() {
 
   
   pinMode(TILT_PIN, INPUT);
+
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
 }
 
 unsigned long previousMillis = 0;        // will store last time LED was updated
@@ -567,6 +571,36 @@ long interval = 2000;           // interval of duration of movement
 
 void loop()
 {
+  long duration, distance;
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distance = (duration / 2) / 29.1;
+
+
+  if (distance < 4) {  // This is where the LED On/Off happens
+    //digitalWrite(led,HIGH); // When the Red condition is met, the Green LED should turn off
+    //digitalWrite(led2,LOW);
+  }
+  else {
+    //digitalWrite(led,LOW);
+    //digitalWrite(led2,HIGH);
+    if (debug) Serial.print(distance);
+    if (debug) Serial.println(" cm");
+  }
+  
+  if (distance >= 200 || distance <= 0){
+    if (debug) Serial.println("Out of range");
+  }
+  else {
+    //if (debug) Serial.print(distance); 
+    //if (debug) Serial.println(" cm");
+  }
+  sensor.distance = distance;
+  
   int state,controlvalue;
   unsigned long currentMillis = millis();
   

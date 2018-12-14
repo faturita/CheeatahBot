@@ -108,7 +108,7 @@ while (True):
 
     if (angle<30 and distance>0):
         dst[0] = distance
-    elif ((angle>=85 and angle<=95) and distance>0):
+    elif ((angle>=79 and angle<=90) and distance>0):
         dst[1] = distance
     elif (angle>115 and distance>0):
         dst[2] = distance
