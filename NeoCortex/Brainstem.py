@@ -257,9 +257,9 @@ while(True):
             # if something else can be enabled.
 
         if (data=='1'):
-            ssmr.write('A9028')
+            ssmr.write('A9018')
         elif (data=='2'):
-            ssmr.write('A9090')
+            ssmr.write('A9082')
         elif (data=='3'):
             ssmr.write('A9170')
         if (data == 'Q'):
