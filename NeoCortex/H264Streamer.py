@@ -74,6 +74,8 @@ class H264VideoStreamer:
                 print 'error!!'
                 doWait=True
 
+        server_socket.close()
+
 
 if __name__ == "__main__":
     vd = H264VideoStreamer()
