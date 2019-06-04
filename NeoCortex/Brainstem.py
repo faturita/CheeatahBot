@@ -207,7 +207,8 @@ while(True):
             mots = None
 
             if (sens != None):
-                sensorimotor.repack([10],[fps.fps])
+                # Check where to put the value
+                sensorimotor.repack([0],[fps.fps])
                 sensorimotor.send(sensorimotor.data)
 
             if (sens != None and target != None):
