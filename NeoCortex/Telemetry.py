@@ -18,6 +18,39 @@ import sys, select
 import socket
 import Configuration
 
+from Fps import Fps
+
+data1 = 1
+data2 = 2
+data3 = 3
+
+min = -10
+max = 200
+
+length = 26
+unpackcode = 'hhffffhhh'
+
+length = 66
+unpackcode='fffffffffffhhhhhhhhhhh'
+
+length = 40
+unpackcode = 'ffffhhhhhhhhhhhh'
+
+if (len(sys.argv)>=2):
+    print "Reading which data to shown"
+    data1 = int(sys.argv[1])
+    data2 = int(sys.argv[2])
+    data3 = int(sys.argv[3])
+
+if (len(sys.argv)>=5):
+    min = int(sys.argv[4])
+    max = int(sys.argv[5])
+
+if (len(sys.argv)>=7):
+    length = int(sys.argv[6])
+    unpackcode = sys.argv[7]
+
+
 serialconnected = False
 
 if (not serialconnected):
@@ -76,7 +109,7 @@ line1, = ax.plot(x,'r', label='X') # Returns a tuple of line objects, thus the c
 line2, = ax.plot(y,'g', label='Y')
 line3, = ax.plot(z,'b', label='Z')
 
-ax.axis([0, 500, -5000, 5000])
+ax.axis([0, 500, min, max])
 
 
 plcounter = 0
@@ -86,14 +119,16 @@ plotx = []
 
 counter = 0
 
-length = 36
-unpackcode = 'iiihhhhhhhhhhhh'
+
 
 if (serialconnected):
    ser.write('A7180')
-
+address = ''
+fps = Fps()
+fps.tic()
 while True:
   # read
+  fps.steptoc()
   if (serialconnected):
       ser.write('S')
       ser.write('P')
@@ -103,32 +138,24 @@ while True:
 
   if myByte == 'S':
       if (serialconnected):
-         data = ser.read(length) # 44
+         data = ser.read(length) # 24
          myByte = ser.read(1)
       else:
-         data, address = sock.recvfrom(length)
+         data, address = sock.recvfrom(length) # 44+26
          myByte = 'E'
 
       if myByte == 'E' and len(data)>0 and len(data) == length:
           # is  a valid message struct
           new_values = unpack(unpackcode,data)
+          #new_values = unpack('ffffffhhhhhhhhhh'+'hhffffhhh',data)
           #new_values = unpack('ffffffhhhhhhhhhh', data)
-          print str(new_values)
+          print str(address)+'-'+str(fps.fps)+':'+str(new_values)
           #print str(new_values[1]) + '\t' + str(new_values[2]) + '\t' + str(new_values[3])
-          f.write( str(new_values[5]) + ' ' + str(new_values[6]) + ' ' + str(new_values[7]) + '\n')
+          f.write( str(new_values[data1]) + ' ' + str(new_values[data2]) + ' ' + str(new_values[data3]) + '\n')
 
-          #x.append( float(new_values[5]-14000))
-          #y.append( float(new_values[6]))
-          #z.append( float(new_values[7]))
-
-          # SCAN
-          x.append( float(new_values[2]))
-          y.append( float(new_values[13]))
-          z.append( float(0))
-
-          #x.append( float(new_values[9]))
-          #y.append( float(new_values[10]))
-          #z.append( float(new_values[11]))
+          x.append( float(new_values[data1]))
+          y.append( float(new_values[data2]))
+          z.append( float(new_values[data3]))
 
           plotx.append( plcounter )
 

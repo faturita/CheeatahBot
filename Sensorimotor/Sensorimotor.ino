@@ -1,4 +1,6 @@
 /**
+    CheatahBot
+    
     Basic Program to decode the driving signal of a DC Motor
     Particularly,
 
@@ -154,6 +156,7 @@ void doEncoder2()
 
 
 struct sensortype {
+  float fps;     // 4
   long encoder1; // 4
   long encoder2; // 4 
   long distance; // 4 
@@ -168,8 +171,8 @@ struct sensortype {
   int16_t gz;    // 2
   int pan;        // 2
   int scan;       // 2
-  int fps;        // 2
-} sensor; // 36
+  int freq;        // 2
+} sensor; // 40
 
 
 
@@ -369,7 +372,7 @@ void scan()
   
 }
 
-void StateMachine(int state, int controlvalue)
+int StateMachine(int state, int controlvalue)
 {
   switch (state)
   {
@@ -428,16 +431,12 @@ void StateMachine(int state, int controlvalue)
       resetEncoderPos();
       targetpos=0; 
       break;
-    case 0x0b:
-      setBurstSize(controlvalue);
-      state = 0;
-      break;
     default:
       // Do Nothing
       state = 0;
       break;
-
   }  
+  return state;
 }
 
 //void loop1()
@@ -604,7 +603,8 @@ void loop()
   int state,controlvalue;
   unsigned long currentMillis = millis();
   
-  sensor.fps = fps();
+  sensor.freq = freq();
+  sensor.fps = 0.0;
 
   parseCommand(state,controlvalue);
   

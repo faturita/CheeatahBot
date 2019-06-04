@@ -3,9 +3,6 @@
  * The ultrasound sensor works with only one SIG pin (instead of trig and echo)
  * 
  */
-#define trigPin 2
-#define echoPin 3
-
 
 
 void setupUltraSensor() {

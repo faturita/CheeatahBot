@@ -1,6 +1,6 @@
 #define MAX_SIZE_SENSOR_BURST 100
 
-int fps()
+int freq()
 {
   static int freqValue = 200;
   static int freqCounter = 0;
@@ -27,13 +27,21 @@ int fps()
 }
 
 bool sensorburst = false;
-int sampleCounter = 0;
+int transmittedCounter = 0;
 int burstsize = MAX_SIZE_SENSOR_BURST;
+
+int updateFreq = 1;
 
 void setBurstSize(int pburstsize)
 {
   burstsize = pburstsize;
 }
+
+void setUpdateFreq(int controlvalue) 
+{
+  updateFreq = controlvalue;
+}
+
 
 bool checksensors()
 {
@@ -51,12 +59,15 @@ bool checksensors()
 void burstsensors() {
   if (sensorburst)
   {
-    transmitsensors();
-    sampleCounter++;
-    if (sampleCounter >= burstsize || sampleCounter >= MAX_SIZE_SENSOR_BURST)
+    if (transmittedCounter % updateFreq == 0)
+    {
+      transmitsensors();
+    }
+    transmittedCounter++;
+    if (transmittedCounter >= burstsize || transmittedCounter >= MAX_SIZE_SENSOR_BURST)
     {
       sensorburst = false;
-      sampleCounter = 0;
+      transmittedCounter = 0;
     }
   }
 }
@@ -65,7 +76,7 @@ void startburst()
 {
   sensorburst = true;
   // Reset counter to avoid loosing data.
-  sampleCounter = 0;
+  transmittedCounter = 0;
 }
 
 void stopburst()
@@ -73,10 +84,29 @@ void stopburst()
   sensorburst = false;  
 }
 
+void payloadsize()
+{
+  int len = sizeof(sensor);
+  char aux[sizeof(int)];  
+  
+  memcpy(&aux,&len,sizeof(int));
+
+  Serial.write((uint8_t *)&aux,sizeof(int));
+ 
+}
+
+// FIXME: Modify this.
+void payloadstruct()
+{
+  char aux[5];
+  strcpy(aux,"ffffhhhhhhhhhhhh");
+  Serial.write(aux);
+}
+
 void transmitsensors() {
   int len = sizeof(sensor);
-  char aux[len];  //36
-  memcpy(&aux, &sensor, len);
+  char aux[len];  //70
+  memcpy(&aux,&sensor,len);
 
   if (debug)
   {
@@ -86,23 +116,18 @@ void transmitsensors() {
     Serial.print("Long:");Serial.println(sizeof(long));
     Serial.print("int16_t");Serial.println(sizeof(int16_t));
   }
-
+  
   Serial.write('S');
-  Serial.write((uint8_t *)&aux, len);
+  Serial.write((uint8_t *)&aux,len);
   Serial.write('E');
 
   if (debug) {
     Serial.println('S');
-    Serial.print("Cx:"); Serial.println(sensor.acx);
-    Serial.print("Cy:"); Serial.println(sensor.acy);
-    Serial.print("Cz:"); Serial.println(sensor.acz);
-    Serial.print("Encoder:"); Serial.println(sensor.armencoder);
-    Serial.println(']');
-  }
 
+  }
+  
 
   //Aguarda 5 segundos e reinicia o processo
   //delay(5000);
 }
-
 

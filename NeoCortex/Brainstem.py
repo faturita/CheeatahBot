@@ -67,6 +67,26 @@ if (dosomestreaming):
     except:
         pass
 
+# Open connection to tilt sensor (@deprecated)
+#hidraw = prop.setupsensor()
+# Open serial connection to MotorUnit and Sensorimotor Arduinos.
+def doserial():
+    retries=1
+    ssmr=None
+    mtrn=None
+    while (retries<5):
+        try:
+            [ssmr, mtrn] = prop.serialcomm()
+            print 'Connection established'
+            return [ssmr, mtrn]
+        except Exception as e:
+            print 'Error while establishing serial connection.'
+            retries=retries+1
+
+    return [ssmr, mtrn]
+
+[ssmr, mtrn] = doserial()
+
 # Initialize UDP Controller Server on port 10001 (ShinkeyBotController)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('0.0.0.0', 10001)
@@ -118,25 +138,21 @@ if (dobroadcastip):
 
 print 'Connection to Remote Controller established.'
 
-# Open connection to tilt sensor (@deprecated)
-#hidraw = prop.setupsensor()
-# Open serial connection to MotorUnit and Sensorimotor Arduinos.
-def doserial():
-    retries=1
-    ssmr=None
-    mtrn=None
-    while (retries<5):
-        try:
-            [ssmr, mtrn] = prop.serialcomm()
-            print 'Connection established'
-            return [ssmr, mtrn]
-        except Exception as e:
-            print 'Error while establishing serial connection.'
-            retries=retries+1
+def terminateme():
+    try:
+        t.cancel()
+        print 'Thread successfully closed.'
+    except Exception as e:
+        print 'Exception while closing video stream thread.'
+        traceback.print_exc(file=sys.stdout)
 
-    return [ssmr, mtrn]
+    os.remove('running.wt')
+    print 'ShinkeyBot has stopped.'
 
-[ssmr, mtrn] = doserial()
+
+if (ssmr == None and mtrn == None):
+    terminateme()
+
 
 tgt = -300
 
@@ -148,8 +164,12 @@ visualpos = [60,150,90]
 sensesensor = False
 
 # Connect remotely to any client that is waiting for sensor loggers.
-sensorimotor = senso.Sensorimotor('sensorimotor',36,'fffhhhhhhhhhhhh')
+sensorimotor = senso.Sensorimotor('sensorimotor',40,'ffffhhhhhhhhhhhh')
 sensorimotor.start()
+sensorimotor.init(ssmr)
+sensorimotor.sensorlocalburst=100
+sensorimotor.sensorburst=10
+sensorimotor.updatefreq=5
 sensorimotor.cleanbuffer(ssmr)
 
 
@@ -158,6 +178,9 @@ class Surrogator:
     def __init__(self, sock):
         print 'Remote controlling ShinkeyBot'
         self.data = ''
+        self.message = ''
+        self.controlvalue = 0
+        self.command = ''
         self.sock = sock
         self.address = None
         self.keeprunning = True
@@ -184,6 +207,18 @@ class Surrogator:
         except Exception as e:
             pass
 
+    def getmessage(self):
+        self.data = ''
+        try:
+            # Read from the UDP controller socket non blocking
+            # The message format is AANNN
+            self.message, self.address = self.sock.recvfrom(5)
+            self.command = self.message[0]
+            self.data = self.message[1]
+            self.controlvalue = int(self.message[2:5])
+        except Exception as e:
+            pass
+
 
     def hookme(self):
         while (self.keeprunning):
@@ -206,10 +241,16 @@ speed=50
 fps = Fps()
 fps.tic()
 
+ts = time.time()
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
+runninglog = open('../data/brainstem.'+st+'.dat', 'w')
+
 # Live
 while(True):
     try:
         fps.steptoc()
+        ts = int(time.time())
+        runninglog.write(str(ts) + ',' + str(fps.fps) + '\n')
         #print "Estimated frames per second: {0}".format(fps.fps)
         data = ''
         # TCP/IP server is configured as non-blocking
@@ -223,6 +264,7 @@ while(True):
             mots = None
 
             if (sens != None):
+                sensorimotor.repack([10],[fps.fps])
                 sensorimotor.send(sensorimotor.data)
 
             if (sens != None and target != None):
@@ -245,92 +287,98 @@ while(True):
                     if (sens[15]<90):
                         ssmr.write('5')
 
+        if (sur.command == 'A'):
+            if (len(sur.message)==5):
+                # Sending the message that was received.
+                ssmr.write(sur.message)
+                sur.message = ''
 
-        if (data == '!'):
-            # IP Address exchange.
-            sensorimotor.ip = address[0]
-            sensorimotor.restart()
+        elif (sur.command == 'U'):
+            if (data == '!'):
+                # IP Address exchange.
+                sensorimotor.ip = address[0]
+                sensorimotor.restart()
 
-            print "Reloading target ip for telemetry:"+sensorimotor.ip
+                print "Reloading target ip for telemetry:"+sensorimotor.ip
 
-            # Vst VideoStream should be likely restarted in order to check
-            # if something else can be enabled.
+                # Vst VideoStream should be likely restarted in order to check
+                # if something else can be enabled.
 
-        if (data=='1'):
-            ssmr.write('A9018')
-        elif (data=='2'):
-            ssmr.write('A9082')
-        elif (data=='3'):
-            ssmr.write('A9170')
-        if (data == 'Q'):
-            # Activate/Deactivate sensor data.
-            sensesensor = True
-        elif (data == 'q'):
-            sensesensor = False
-        if (data == 'k'):
-            # Automode
-            automode = (not automode)
-        elif (data=='W'):
-            ssmr.write('A3'+'{:3d}'.format(speed))
-        elif (data=='S'):
-            ssmr.write('A4'+'{:3d}'.format(speed))
-        elif (data=='A'):
-            ssmr.write('A1'+'{:3d}'.format(50))
-        elif (data=='D'):
-            ssmr.write('A2'+'{:3d}'.format(50))
-        elif (data==' '):
-            if (speed<120):
-                ssmr.write('A3010')
-                ssmr.write('A3000')
-        elif (data=='H'):
-            ssmr.write('=')
-        elif (data==';'):
-            speed = speed - 50
-            if (speed<50):
+            if (data=='1'):
+                ssmr.write('A9018')
+            elif (data=='2'):
+                ssmr.write('A9082')
+            elif (data=='3'):
+                ssmr.write('A9170')
+            if (data == 'Q'):
+                # Activate/Deactivate sensor data.
+                sensesensor = True
+            elif (data == 'q'):
+                sensesensor = False
+            if (data == 'k'):
+                # Automode
+                automode = (not automode)
+            elif (data=='W'):
+                ssmr.write('A3'+'{:3d}'.format(speed))
+            elif (data=='S'):
+                ssmr.write('A4'+'{:3d}'.format(speed))
+            elif (data=='A'):
+                ssmr.write('A1'+'{:3d}'.format(50))
+            elif (data=='D'):
+                ssmr.write('A2'+'{:3d}'.format(50))
+            elif (data==' '):
+                if (speed<120):
+                    ssmr.write('A3010')
+                    ssmr.write('A3000')
+            elif (data=='H'):
+                ssmr.write('=')
+            elif (data==';'):
+                speed = speed - 50
+                if (speed<50):
+                    speed = 50
+                ssmr.write('A3'+'{:3d}'.format(speed))
+            elif (data==','):
+                speed = speed + 50
+                if (speed>250):
+                    speed = 250
+            elif (data=='.'):
                 speed = 50
-            ssmr.write('A3'+'{:3d}'.format(speed))
-        elif (data==','):
-            speed = speed + 50
-            if (speed>250):
-                speed = 250
-        elif (data=='.'):
-            speed = 50
-        elif (data=='{'):
-            # Camera left
-            visualpos[0]=visualpos[0]+1;
-            ssmr.write('A8'+'{:3d}'.format(visualpos[0]))
-        elif (data=='}'):
-            # Camera right
-            visualpos[0]=visualpos[0]-1;
-            ssmr.write('A8'+'{:3d}'.format(visualpos[0]))
-        elif (data=='['):
-            # Nose down
-            visualpos[1]=visualpos[1]-1;
-            ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
-        elif (data==']'):
-            # Nose up
-            visualpos[1]=visualpos[1]+1;
-            ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
-        elif (data=='<'):
-            # Nose down
-            visualpos[2]=visualpos[2]-1;
-            ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
-        elif (data=='>'):
-            # Nose up
-            visualpos[2]=visualpos[2]+1;
-            ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
-        elif (data=='K'):
-            ssmr.write('K')
-        elif (data=='O'):
-            ssmr.write('O')
-        elif (data=='='):
-            ssmr.write('=')
-        elif (data=='('):
-            sensorimotor.sensorlocalburst = 100
-        elif (data==')'):
-            sensorimotor.sensorlocalburst = 10000
-        elif (data=='X'):
-            break
+            elif (data=='{'):
+                # Camera left
+                visualpos[0]=visualpos[0]+1;
+                ssmr.write('A8'+'{:3d}'.format(visualpos[0]))
+            elif (data=='}'):
+                # Camera right
+                visualpos[0]=visualpos[0]-1;
+                ssmr.write('A8'+'{:3d}'.format(visualpos[0]))
+            elif (data=='['):
+                # Nose down
+                visualpos[1]=visualpos[1]-1;
+                ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
+            elif (data==']'):
+                # Nose up
+                visualpos[1]=visualpos[1]+1;
+                ssmr.write('A7'+'{:3d}'.format(visualpos[1]))
+            elif (data=='<'):
+                # Nose down
+                visualpos[2]=visualpos[2]-1;
+                ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
+            elif (data=='>'):
+                # Nose up
+                visualpos[2]=visualpos[2]+1;
+                ssmr.write('A9'+'{:3d}'.format(visualpos[2]))
+            elif (data=='K'):
+                ssmr.write('K')
+            elif (data=='O'):
+                ssmr.write('O')
+            elif (data=='='):
+                ssmr.write('=')
+            elif (data=='('):
+                sensorimotor.sensorlocalburst = 100
+            elif (data==')'):
+                sensorimotor.sensorlocalburst = 10000
+            elif (data=='X'):
+                break
     except Exception as e:
         print "Error:" + e.message
         print "Waiting for serial connection to reestablish..."
@@ -356,12 +404,4 @@ sock.close()
 if (not mtrn == None):
     mtrn.close()
 
-try:
-    t.cancel()
-    print 'Thread successfully closed.'
-except Exception as e:
-    print 'Exception while closing video stream thread.'
-    traceback.print_exc(file=sys.stdout)
-
-os.remove('running.wt')
-print 'CheeatahBot has stopped.'
+terminateme()

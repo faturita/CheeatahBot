@@ -11,7 +11,7 @@ void readcommand(int &state, int &controlvalue)
   if (readbytes == 4) {
     if (debug) Serial.println ( (int)buffer[0] );
     int action = 0;
-    if (buffer[0] >= 65)  // send alpha hexa actions.
+    if ((buffer[0] == 'B') || (buffer[0] == 'C') || (buffer[0] == 'D') || (buffer[0] == 'E'))  // send alpha hexa actions.
       action = buffer[0] - 65 + 10;
     else
       action = buffer[0] - 48;
@@ -37,6 +37,7 @@ void parseCommand(int &state, int &controlvalue)
   {
 
     char syncbyte = Serial.read();
+    int action;
 
     switch (syncbyte) 
     {
@@ -81,7 +82,29 @@ void parseCommand(int &state, int &controlvalue)
         //homing=true;
         break;
       case 'A':
-        readcommand(state,controlvalue);
+        readcommand(action,controlvalue);
+        switch(action)
+        {
+          case 0x0b:
+            setBurstSize(controlvalue);
+            state = 0;
+            break;
+          case 0x0c:
+            payloadsize();
+            state = 0;
+            break;
+          case 0x0d:
+            payloadstruct();
+            state = 0;
+            break;
+          case 0x0e:
+            setUpdateFreq(controlvalue);
+            state = 0;
+            break;
+          default:
+            state = action;
+            break;
+        }
         break;
       case 'O':
         setDoScan();
