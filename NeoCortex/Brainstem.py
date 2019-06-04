@@ -197,7 +197,7 @@ while(True):
         #print "Estimated frames per second: {0}".format(fps.fps)
         data = ''
         # TCP/IP server is configured as non-blocking
-        sur.getcommand()
+        sur.getmessage()
         data, address = sur.data, sur.address
 
 
