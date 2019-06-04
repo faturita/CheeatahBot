@@ -28,7 +28,7 @@ import thread
 import H264Streamer as pcs
 import SensorimotorLogger as senso
 import MCast
-import Surrogator
+import Surrogator as Surrogator
 
 import fcntl
 import struct
@@ -173,7 +173,7 @@ sensorimotor.sensorburst=10
 sensorimotor.updatefreq=5
 sensorimotor.cleanbuffer(ssmr)
 
-sur = Surrogator(sock)
+sur = Surrogator.Surrogator(sock)
 
 
 target = [0,0,0]
