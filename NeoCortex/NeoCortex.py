@@ -20,6 +20,8 @@ import sys, select
 
 import Queue
 
+from TelemetryDictionary import telemetrydirs
+
 class Cmd:
     def __init__(self,cmd,dl):
         self.cmd = cmd
@@ -45,8 +47,8 @@ socktelemetry.bind(svaddress)
 #socktelemetry.setblocking(0)
 #socktelemetry.settimeout(0.01)
 
-length = 36
-unpackcode = 'iiihhhhhhhhhhhh'
+length = 40
+unpackcode = 'fiiihhhhhhhhhhhh'
 
 sockcmd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -67,7 +69,7 @@ for i in range(1,2):
     print('Letting know Bot that I want telemetry.')
     sent = sockcmd.sendto('!', server_address)
 
-sent = sockcmd.sendto('Q', server_address)
+sent = sockcmd.sendto('UQ000', server_address)
 
 print '>'
 
@@ -100,8 +102,8 @@ while (True):
     # Analyze incoming data...
     data = ''
 
-    distance = new_values[2]
-    angle = new_values[13]
+    distance = new_values[3]
+    angle = new_values[14]
 
     print (distance)
     print (angle)
@@ -116,44 +118,46 @@ while (True):
     print dst
 
     if (dst[1] < 20):
-        sendmulticommand(' ',2)
+        sendmulticommand('US000',2)
+    else:
+        sendmulticommand('U 000',2)
 
-    if (sd.check()):
-        # Firing check command
-        print ('Firing check command')
-        q.put(Cmd('1',4))
-        q.put(Cmd('2',4))
-        q.put(Cmd('3',4))
-        q.put(Cmd('X',1))
-
-        sd.set(30)
-
-    if (t.check()):
-        if (q.qsize()>0):
-            Cmdand = q.get()
-            if (Cmdand.cmd == 'X'):
-                dirval = max(dst)
-                dir = dst.index(dirval)
-                if (dir == 2):
-                    q.put(Cmd('A',0.5))
-                    q.put(Cmd('2',0.5))
-                    q.put(Cmd('W',7))
-                    q.put(Cmd(' ',5))
-                elif (dir == 0):
-                    q.put(Cmd('D',0.5))
-                    q.put(Cmd('2',0.5))
-                    q.put(Cmd('W',7))
-                    q.put(Cmd(' ',5))
-                else:
-                    q.put(Cmd('W',7))
-                    q.put(Cmd('2',0.5))
-                    q.put(Cmd(' ',5))
-            else:
-                sendmulticommand(Cmdand.cmd,2)
-
-            t.set(Cmdand.delay)
-        else:
-            t.set(10)
+    # if (sd.check()):
+    #     # Firing check command
+    #     print ('Firing check command')
+    #     q.put(Cmd('U1000',4))
+    #     q.put(Cmd('U2000',4))
+    #     q.put(Cmd('U3000',4))
+    #     q.put(Cmd('X',1))
+    #
+    #     sd.set(30)
+    #
+    # if (t.check()):
+    #     if (q.qsize()>0):
+    #         Cmdand = q.get()
+    #         if (Cmdand.cmd == 'X'):
+    #             dirval = max(dst)
+    #             dir = dst.index(dirval)
+    #             if (dir == 2):
+    #                 q.put(Cmd('UA000',0.5))
+    #                 q.put(Cmd('U2000',0.5))
+    #                 q.put(Cmd('UW000',7))
+    #                 q.put(Cmd('U 000',5))
+    #             elif (dir == 0):
+    #                 q.put(Cmd('UD000',0.5))
+    #                 q.put(Cmd('U2000',0.5))
+    #                 q.put(Cmd('UW000',7))
+    #                 q.put(Cmd('U 000',5))
+    #             else:
+    #                 q.put(Cmd('UW000',7))
+    #                 q.put(Cmd('U2000',0.5))
+    #                 q.put(Cmd('U 000',5))
+    #         else:
+    #             sendmulticommand(Cmdand.cmd,2)
+    #
+    #         t.set(Cmdand.delay)
+    #     else:
+    #         t.set(10)
 
 
     # if (state == 0 and t.check()):

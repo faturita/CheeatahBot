@@ -165,7 +165,7 @@ visualpos = [60,150,90]
 sensesensor = False
 
 # Connect remotely to any client that is waiting for sensor loggers.
-sensorimotor = senso.Sensorimotor('sensorimotor',40,'ffffhhhhhhhhhhhh')
+sensorimotor = senso.Sensorimotor('sensorimotor',40,'fiiihhhhhhhhhhhh')
 sensorimotor.start()
 sensorimotor.init(ssmr)
 sensorimotor.sensorlocalburst=100
@@ -225,11 +225,12 @@ while(True):
                     #    ssmr.write('5')
                     #    time.sleep(0.1)
 
-                    print 'Auto:Sensing distance:'+str(sens[15])
-                    ssmr.write('+')
-                    ssmr.write('2')
-                    if (sens[15]<90):
-                        ssmr.write('5')
+                    print 'Auto:Sensing distance:'+str(sens[3])
+                    ssmr.write('A3'+'{:3d}'.format(speed))
+                    if (sens[3]<20):
+                        if (speed<120):
+                            ssmr.write('A3010')
+                            ssmr.write('A3000')
 
         if (sur.command == 'A'):
             if (len(sur.message)==5):
@@ -259,9 +260,11 @@ while(True):
                 sensesensor = True
             elif (data == 'q'):
                 sensesensor = False
-            if (data == 'k'):
+            elif (data=='K'):
+                automode = True
+            elif (data == 'k'):
                 # Automode
-                automode = (not automode)
+                automode = False
             elif (data=='W'):
                 ssmr.write('A3'+'{:3d}'.format(speed))
             elif (data=='S'):
