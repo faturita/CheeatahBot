@@ -225,9 +225,11 @@ while(True):
                     #    ssmr.write('5')
                     #    time.sleep(0.1)
 
-                    print 'Auto:Sensing distance:'+str(sens[3])
-                    ssmr.write('A3'+'{:3d}'.format(speed))
-                    if (sens[3]<20):
+                    print ('Auto:Sensing distance:'+str(sens[3]))
+                    
+                    if (sens[3]>20):
+                        ssmr.write('A3'+'{:3d}'.format(speed))
+                    elif (sens[3]<=20):
                         if (speed<120):
                             ssmr.write('A3010')
                             ssmr.write('A3000')
