@@ -20,6 +20,8 @@ import Configuration
 
 from Fps import Fps
 
+from TelemetryDictionary import telemetrydirs
+
 data1 = 1
 data2 = 2
 data3 = 3
@@ -37,10 +39,15 @@ length = 40
 unpackcode = 'ffffhhhhhhhhhhhh'
 
 if (len(sys.argv)>=2):
-    print "Reading which data to shown"
-    data1 = int(sys.argv[1])
-    data2 = int(sys.argv[2])
-    data3 = int(sys.argv[3])
+    print ("Reading which data to shown")
+    try:
+        data1 = int(sys.argv[1])
+        data2 = int(sys.argv[2])
+        data3 = int(sys.argv[3])
+    except:
+        data1 = telemetrydirs[sys.argv[1]]
+        data2 = telemetrydirs[sys.argv[2]]
+        data3 = telemetrydirs[sys.argv[3]]
 
 if (len(sys.argv)>=5):
     min = int(sys.argv[4])

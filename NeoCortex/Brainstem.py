@@ -24,8 +24,14 @@ import socket
 
 import Proprioceptive as prop
 import thread
-#import PicameraStreamer as pcs
-import H264Streamer as pcs
+import os
+import sys
+import platform
+system_platform = platform.system()
+if system_platform == "Darwin":
+    import FFMPegStreamer as pcs
+else:
+    import H264Streamer as pcs
 import SensorimotorLogger as senso
 import MCast
 import Surrogator as Surrogator
@@ -49,11 +55,15 @@ runningtoken.close()
 
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    return socket.inet_ntoa(fcntl.ioctl(
-        s.fileno(),
-        0x8915,  # SIOCGIFADDR
-        struct.pack('256s', ifname[:15])
-    )[20:24])
+    try:
+        ip = socket.inet_ntoa(fcntl.ioctl(
+            s.fileno(),
+            0x8915,  # SIOCGIFADDR
+            struct.pack('256s', ifname[:15])
+        )[20:24])
+        return ip
+    except:
+        return ''
 
 # Ok, so the first thing to do is to broadcast my own IP address.
 dobroadcastip = True
@@ -77,7 +87,10 @@ def doserial():
     mtrn=None
     while (retries<5):
         try:
-            [ssmr, mtrn] = prop.serialcomm()
+            if system_platform == "Darwin":
+                [ssmr, mtrn] = prop.serialcomm('/dev/cu.usbmodem14101')
+            else:
+                [ssmr, mtrn] = prop.serialcomm()
             print 'Connection established'
             return [ssmr, mtrn]
         except Exception as e:
