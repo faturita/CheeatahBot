@@ -101,6 +101,9 @@ def doserial():
 
 [ssmr, mtrn] = doserial()
 
+if (ssmr == None and mtrn == None):
+    quit()
+
 # Initialize UDP Controller Server on port 10001 (ShinkeyBotController)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('0.0.0.0', 10001)
@@ -122,20 +125,23 @@ else:
     myip = 'None'
 
 # Shinkeybot truly does nothing until it gets connected to ShinkeyBotController
-whenistarted = time.time()
-print 'Multicasting my own IP address:' + myip
-while dobroadcastip:
-    noticer.send()
-    try:
-        data, address = sock.recvfrom(1)
-        if (len(data)>0):
-            break
-    except:
-        data = None
+def broadcastingme(dobroadcastip,noticer, sck,myipaddress):
+    whenistarted = time.time()
+    print 'Multicasting my own IP address:' + myipaddress
+    while dobroadcastip:
+        noticer.send()
+        try:
+            data, address = sck.recvfrom(1)
+            if (len(data)>0):
+                break
+        except:
+            data = None
 
-    if (abs(time.time()-whenistarted)>60):
-        print 'Giving up broadcasting ip... Lets get started.'
-        break
+        if (abs(time.time()-whenistarted)>60):
+            print 'Giving up broadcasting ip... Lets get started.'
+            break
+
+broadcastingme(dobroadcastip,noticer,sock,myip)
 
 from threading import Timer
 
@@ -201,6 +207,8 @@ ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 runninglog = open('../data/brainstem.'+st+'.dat', 'w')
 
+whenreceivedcommand = time.time()
+
 # Live
 while(True):
     try:
@@ -212,7 +220,6 @@ while(True):
         # TCP/IP server is configured as non-blocking
         sur.getmessage()
         data, address = sur.data, sur.address
-
 
         # If someone asked for it, send sensor information.
         if (sensesensor):
@@ -246,6 +253,18 @@ while(True):
                         if (speed<120):
                             ssmr.write('A3010')
                             ssmr.write('A3000')
+
+        else:
+            # Check why I am not receiving anything from a while and shift towards
+            # IP broadcasting again
+            if (abs(time.time()-whenreceivedcommand)>60):
+                print 'Sending a multicast of my own ip address:'+myip
+                broadcastingme(dobroadcastip,noticer,sock,myip)
+                break
+
+        if (sur.command != None and len(sur.command)>0):
+            # Something was received
+            whenreceivedcommand = time.time()
 
         if (sur.command == 'A'):
             if (len(sur.message)==5):
