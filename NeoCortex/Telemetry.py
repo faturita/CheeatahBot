@@ -36,7 +36,7 @@ length = 66
 unpackcode='fffffffffffhhhhhhhhhhh'
 
 length = 40
-unpackcode = 'ffffhhhhhhhhhhhh'
+unpackcode = 'fiiihhhhhhhhhhhh'
 
 if (len(sys.argv)>=2):
     print ("Reading which data to shown")

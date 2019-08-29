@@ -1,0 +1,18 @@
+function ret=fivedegreepol(tick,desttime)
+
+%x = (tick.*10)/(desttime*100);
+
+%ret=x.*x.*x.* (100.0/1000.0) + x.*(-150.0/10000) + x.*(60/100000);
+
+a0 = e0;
+a1 = s0;
+a2 = 1/2 * acc0;
+a3 = 1/(2 * tf^3)*(20 * ef - 20 * e0 - (8*sf + 12 * s0)*tf - (e*acc0 - accf)*tf^2);
+a4 = 1/(2 * tf^4)*(30 * e0 - 30 * ef + (14*sf + 16*s0)*tf - (3*acc0 - 2*accf)*tf^2);
+a5 = 1/(2 * tf^5)*(12 * ef - 12 * e0 - (6 *sf + 6*s0)*tf - (acc0-accf)*tf^2);
+
+
+ret =
+
+
+end

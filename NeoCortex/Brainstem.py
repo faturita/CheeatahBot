@@ -7,7 +7,7 @@
 # x) Transmit TCP/IP images through CameraStreamer.
 # x) Captures sensor data from SensorimotorLogger
 # x) Handles output to motor unit and sensorimotor commands through Proprioceptive
-# x) Receives high-level commands from ShinkeyBotController.
+# x) Receives high-level commands from BotController.
 
 import numpy as np
 import cv2
@@ -294,11 +294,8 @@ while(True):
                 sensesensor = True
             elif (data == 'q'):
                 sensesensor = False
-            elif (data=='K'):
-                automode = True
-            elif (data == 'k'):
-                # Automode
-                automode = False
+            elif (data=='P'):
+                ssmr.write('P')
             elif (data=='W'):
                 ssmr.write('A3'+'{:3d}'.format(speed))
             elif (data=='S'):
@@ -376,6 +373,8 @@ while(True):
 vst.keeprunning = False
 sur.keeprunning = False
 time.sleep(2)
+
+ssmr.write(' ')
 
 
 #When everything done, release the capture

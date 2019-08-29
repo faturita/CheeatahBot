@@ -47,6 +47,11 @@ void parseCommand(int &state, int &controlvalue)
       case 'S':
         startburst();
         break;
+      case 'R':
+        resetEncoders();
+        break;
+      case 'P':
+        precise = !precise;
       case 'X':
         stopburst();
         break;

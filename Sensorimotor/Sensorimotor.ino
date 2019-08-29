@@ -31,7 +31,10 @@
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #include <Servo.h>
 
+unsigned long tick = 0;
 bool debug = false;
+
+bool precise = false;
 
 class ControlledServo {
 public:
@@ -82,83 +85,10 @@ public:
 ControlledServo scanner;
 ControlledServo pan;
 
-#define encoder1PinA  3
-#define encoder1PinB  5
-
-#define encoder2PinA  2
-#define encoder2PinB  4
-
-
-class MotorEncoder {
-public:
-  int encoderPinA;
-  int encoderPinB;
-  volatile long encoderPos = 0;
-  long newposition;
-  long oldposition = 0;
-  unsigned long newtime;
-  unsigned long oldtime = 0;
-  long vel;  
-
-  void setpins(int pencoder0PinA, int pencoder0PinB) 
-  {
-    encoderPinA = pencoder0PinA;
-    encoderPinB = pencoder0PinB;  
-  }
-
-  void setup()
-  {
-    pinMode(encoderPinA, INPUT);
-    digitalWrite(encoderPinA, HIGH);       // turn on pullup resistor
-    pinMode(encoderPinB, INPUT);
-    digitalWrite(encoderPinB, HIGH);       // turn on pullup resistor
-  }
-
-  void loop()
-  {
-    newposition = encoderPos;
-    newtime = millis();
-    int sign=1;
-    if ((newposition - oldposition) < 0)
-      sign = -1;
-    vel = sign * (newposition - oldposition) * 1000 / (newtime - oldtime);
-    vel = sign * encoderPos;
-    //Serial.print (encoderPinA);
-    //Serial.print (" speed = ");
-    //Serial.println (vel);
-    oldposition = newposition;
-    oldtime = newtime;
-  }
-
-};
-
-MotorEncoder motorencoder1;
-MotorEncoder motorencoder2;
-
-void doEncoder1()
-{
-  if (digitalRead(encoder1PinA) == digitalRead(encoder1PinB)) {
-    motorencoder1.encoderPos--;
-  } else {
-    motorencoder1.encoderPos++;
-  }
-}
-
-void doEncoder2()
-{
-  if (digitalRead(encoder2PinA) == digitalRead(encoder2PinA)) {
-    motorencoder2.encoderPos++;
-  } else {
-    motorencoder2.encoderPos--;
-  }
-}
-
-
-
 struct sensortype {
   float fps;     // 4
-  long encoder1; // 4
-  long encoder2; // 4 
+  long rightEncoder; // 4
+  long leftEncoder; // 4 
   long distance; // 4 
   int counter; // 2
   int armencoder; // 2
@@ -222,29 +152,44 @@ bool updatedc(Adafruit_DCMotor *dcmotor, int currentpos)
 
 }
 
+
+
+bool pcontrol(Adafruit_DCMotor *dcmotor, int torq, int targetpos, int currentpos)
+{ 
+  int error = 40;
+
+  if ((targetpos<(currentpos-error))||(targetpos>(currentpos+error)))
+  {
+    dcmotor->setSpeed(torq);
+
+    if (targetpos < currentpos)
+      dcmotor->run(BACKWARD);
+    else
+      dcmotor->run(FORWARD);
+
+    return false;
+
+  } else {
+    dcmotor->setSpeed(0);
+    return true;
+  }
+
+}
+
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // Or, create it with a different I2C address (say for stacking)
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61);
 
 // Select which 'port' M1, M2, M3 or M4. In this case, M1
-Adafruit_DCMotor *myMotor1 = AFMS.getMotor(1);
-Adafruit_DCMotor *myMotor2 = AFMS.getMotor(2);
+Adafruit_DCMotor *rightMotor = AFMS.getMotor(1);
+Adafruit_DCMotor *leftMotor = AFMS.getMotor(2);
 Adafruit_DCMotor *elbowMotor = AFMS.getMotor(3);
 Adafruit_DCMotor *myMotor4 = AFMS.getMotor(4);
 // You can also make another motor on port M2
 //Adafruit_DCMotor *myOtherMotor = AFMS.getMotor(2);
 
-void setupMotorEncoders()
-{
-  motorencoder2.setpins(encoder2PinA, encoder2PinB);
-  motorencoder2.setup();  
-  attachInterrupt(digitalPinToInterrupt(encoder2PinA), doEncoder1, RISING);  // encoDER ON PIN 2
 
-  motorencoder1.setpins(encoder1PinA, encoder1PinB);
-  motorencoder1.setup();  
-  attachInterrupt(digitalPinToInterrupt(encoder1PinA), doEncoder2, RISING);  // encoDER ON PIN 2  
-}
 
 void setup1() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
@@ -254,15 +199,15 @@ void setup1() {
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
 
   // Set the speed to start, from 0 (off) to 255 (max speed)
-  myMotor1->setSpeed(1);
-  myMotor1->run(FORWARD);
+  rightMotor->setSpeed(1);
+  rightMotor->run(FORWARD);
   // turn on motor
-  myMotor1->run(RELEASE);
+  rightMotor->run(RELEASE);
 
-  myMotor2->setSpeed(1);
-  myMotor2->run(FORWARD);
+  leftMotor->setSpeed(1);
+  leftMotor->run(FORWARD);
   // turn on motor
-  myMotor2->run(RELEASE);
+  leftMotor->run(RELEASE);
 
   elbowMotor->setSpeed(1);
   elbowMotor->run(FORWARD);
@@ -284,18 +229,6 @@ void setup1() {
 
   setTargetPos(0);
   
-}
-
-void loopEncoders()
-{
-  motorencoder1.loop();
-  //motorencoder1.vel = motorencoder1.vel / 78.0;
-  motorencoder2.loop();
-  //motorencoder2.vel = motorencoder2.vel / 324.03;
-  Serial.print( motorencoder1.vel  );
-  Serial.print(' ');
-  Serial.println(motorencoder2.vel ) ;
-  delay(250);
 }
 
 void domotor(Adafruit_DCMotor *myMotor, int spd, int dir) {
@@ -374,45 +307,62 @@ void scan()
 
 int StateMachine(int state, int controlvalue)
 {
+  static int previousState = 0;
+  if (state != previousState)
+  {
+    resetEncoders();
+  }
   switch (state)
   {
     case 1:
-      // Right
-      myMotor1->setSpeed(controlvalue);
-      myMotor1->run(FORWARD);
-      myMotor2->setSpeed(controlvalue);
-      myMotor2->run(BACKWARD); 
+      // Left
+      if (!precise)
+      {
+        rightMotor->setSpeed(controlvalue);
+        rightMotor->run(FORWARD);
+        leftMotor->setSpeed(controlvalue);
+        leftMotor->run(BACKWARD); 
+      } else
+      {
+        pcontrol(rightMotor,40,-1350, sensor.rightEncoder);
+      }
       break;
     case 2:
-      // Left
-      myMotor1->setSpeed(controlvalue);
-      myMotor1->run(BACKWARD);
-      myMotor2->setSpeed(controlvalue);
-      myMotor2->run(FORWARD);
+      // Right
+      if (!precise)
+      {
+        rightMotor->setSpeed(controlvalue);
+        rightMotor->run(BACKWARD);
+        leftMotor->setSpeed(controlvalue);
+        leftMotor->run(FORWARD);
+      } else 
+      {
+        pcontrol(leftMotor,40,-6800, sensor.leftEncoder);
+      }
       break;
     case 3:
-      myMotor1->setSpeed(controlvalue);
-      myMotor1->run(FORWARD);
-      myMotor2->setSpeed(controlvalue);
-      myMotor2->run(FORWARD); 
+      rightMotor->setSpeed(controlvalue);
+      rightMotor->run(FORWARD);
+      leftMotor->setSpeed(controlvalue);
+      leftMotor->run(FORWARD); 
       break; 
     case 4:
-      myMotor1->setSpeed(controlvalue);
-      myMotor1->run(BACKWARD);
-      myMotor2->setSpeed(controlvalue);
-      myMotor2->run(BACKWARD); 
+      rightMotor->setSpeed(controlvalue);
+      rightMotor->run(BACKWARD);
+      leftMotor->setSpeed(controlvalue);
+      leftMotor->run(BACKWARD); 
       break;   
     case 5:
-      myMotor1->setSpeed(controlvalue);
-      myMotor1->run(BACKWARD);
-      myMotor2->setSpeed(controlvalue);
-      myMotor2->run(FORWARD); 
+      rightMotor->setSpeed(controlvalue);
+      rightMotor->run(BACKWARD);
+      leftMotor->setSpeed(controlvalue);
+      leftMotor->run(FORWARD); 
       break;  
     case 6:
-      myMotor1->setSpeed(controlvalue);
-      myMotor1->run(FORWARD);
-      myMotor2->setSpeed(controlvalue);
-      myMotor2->run(BACKWARD); 
+      rightMotor->setSpeed(controlvalue);
+      rightMotor->run(FORWARD);
+      leftMotor->setSpeed(controlvalue);
+      leftMotor->run(BACKWARD); 
       break;  
     case 7:
       setTargetPos(controlvalue-150);
@@ -425,8 +375,8 @@ int StateMachine(int state, int controlvalue)
       scanner.tgtPos = controlvalue;  
       break;
     case 0x0a:
-      myMotor1->run(RELEASE);
-      myMotor2->run(RELEASE);
+      rightMotor->run(RELEASE);
+      leftMotor->run(RELEASE);
       elbowMotor->run(RELEASE);
       resetEncoderPos();
       targetpos=0; 
@@ -436,6 +386,7 @@ int StateMachine(int state, int controlvalue)
       state = 0;
       break;
   }  
+  previousState = state;
   return state;
 }
 
@@ -450,8 +401,8 @@ int StateMachine(int state, int controlvalue)
 //  updateEncoder();
 //  sensor.armencoder = getEncoderPos();
 //  
-//  //domotor(myMotor2, speed, FORWARD);
-//  //domotor(myMotor1, speed, FORWARD);
+//  //domotor(leftMotor, speed, FORWARD);
+//  //domotor(rightMotor, speed, FORWARD);
 //  updatedc(elbowMotor, getEncoderPos());
 //
 //  //loopencoder();
@@ -525,22 +476,22 @@ void setup() {
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
 
   // Set the speed to start, from 0 (off) to 255 (max speed)
-  myMotor1->setSpeed(1);
-  myMotor1->run(FORWARD);
+  rightMotor->setSpeed(1);
+  rightMotor->run(FORWARD);
   // turn on motor
-  myMotor1->run(RELEASE);
+  rightMotor->run(RELEASE);
 
-  myMotor2->setSpeed(1);
-  myMotor2->run(FORWARD);
+  leftMotor->setSpeed(1);
+  leftMotor->run(FORWARD);
   // turn on motor
-  myMotor2->run(RELEASE);
+  leftMotor->run(RELEASE);
 
   elbowMotor->setSpeed(1);
   elbowMotor->run(FORWARD);
   // turn on motor
   elbowMotor->run(RELEASE);
 
-  //setupMotorEncoders();
+  setupMotorEncoders();
   setupEncoder();
   //setupUltraSensor();
   setupSuperSensor();
@@ -587,12 +538,12 @@ void loop()
   else {
     //digitalWrite(led,LOW);
     //digitalWrite(led2,HIGH);
-    if (debug) Serial.print(distance);
-    if (debug) Serial.println(" cm");
+    //if (debug) Serial.print(distance);
+    //if (debug) Serial.println(" cm");
   }
   
   if (distance >= 200 || distance <= 0){
-    if (debug) Serial.println("Out of range");
+    //if (debug) Serial.println("Out of range");
   }
   else {
     //if (debug) Serial.print(distance); 
@@ -613,7 +564,8 @@ void loop()
   
   updatedc(elbowMotor, getEncoderPos());
 
-  //loopEncoders();
+
+  loopEncoders();
 //  if (currentMillis - previousMillis >= interval) {
 //    // save the last time you blinked the LED
 //    previousMillis = currentMillis;
