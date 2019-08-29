@@ -149,7 +149,7 @@ def timeout():
     print 'Sending a multicast update of my own ip address:'+myip
     noticer.send()
 
-t = Timer(5 * 60, timeout)
+t = Timer(500 * 60, timeout)
 t.start()
 
 if (dobroadcastip):
