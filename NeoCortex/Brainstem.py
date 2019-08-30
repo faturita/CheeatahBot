@@ -149,6 +149,7 @@ def timeout():
     print 'Sending a multicast update of my own ip address:'+myip
     noticer.send()
 
+# FIXME: Once running, the multicast breaks the UDP receiving socket.
 t = Timer(500 * 60, timeout)
 t.start()
 
@@ -196,7 +197,6 @@ sur = Surrogator.Surrogator(sock)
 
 
 target = [0,0,0]
-automode = False;
 
 speed=50
 
@@ -231,33 +231,10 @@ while(True):
                 sensorimotor.repack([0],[fps.fps])
                 sensorimotor.send(sensorimotor.data)
 
-            if (sens != None and target != None):
-                if (target[0] == 0):
-                    target = sens[9], sens[10], sens[11]
-
-                if (automode):
-                    #print "Moving to :" + str(target[0]) + '\t' + str(target[1]) + '\t' + str(target[2])
-                    #print "From:     :" + str(sens[9])   + '\t' + str(sens[10])  + '\t' + str(sens[11])
-                    #if (not ( abs(sens[9]-target[0])<10) ):
-                    #    ssmr.write('-')
-                    #    ssmr.write('4')
-                    #    time.sleep(0.2)
-                    #    ssmr.write('5')
-                    #    time.sleep(0.1)
-
-                    print ('Auto:Sensing distance:'+str(sens[3]))
-                    
-                    if (sens[3]>20):
-                        ssmr.write('A3'+'{:3d}'.format(speed))
-                    elif (sens[3]<=20):
-                        if (speed<120):
-                            ssmr.write('A3010')
-                            ssmr.write('A3000')
-
         else:
             # Check why I am not receiving anything from a while and shift towards
-            # IP broadcasting again
-            if (abs(time.time()-whenreceivedcommand)>60):
+            # IP broadcasting again  # FIXME
+            if (abs(time.time()-whenreceivedcommand)>60000):
                 print 'Sending a multicast of my own ip address:'+myip
                 broadcastingme(dobroadcastip,noticer,sock,myip)
                 break
