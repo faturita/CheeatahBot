@@ -50,7 +50,7 @@ void parseCommand(int &state, int &controlvalue)
       case 'R':
         resetEncoders();
         break;
-      case 'P':
+      case '%':
         precise = !precise;
       case 'X':
         stopburst();

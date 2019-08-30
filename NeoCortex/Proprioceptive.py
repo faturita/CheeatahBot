@@ -19,12 +19,12 @@ def serialcomm(serialportname=None):
     serials = []
 
     if (serialportname):
-        sera = serial.Serial(port=serialportname, baudrate=baudrate,timeout=0)
+        sera = serial.Serial(port=serialportname, baudrate=baudrate,timeout=0.050)
         serials.append(sera)
     else:
         while (serialport<15):
             if (os.path.exists('/dev/ttyACM'+str(serialport))):
-                sera = serial.Serial(port='/dev/ttyACM'+str(serialport), baudrate=baudrate, timeout=0)
+                sera = serial.Serial(port='/dev/ttyACM'+str(serialport), baudrate=baudrate, timeout=0.050)
                 serials.append(sera)
                 break
             serialport = serialport + 1

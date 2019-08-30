@@ -125,7 +125,7 @@ class Sensorimotor:
               # is  a valid message struct
               #new_values = unpack('ffffffhhhhhhhhhh', data)
               new_values = unpack(self.mapping, self.data)
-              #print new_values
+              print new_values
               self.sensors = new_values
               return new_values
 

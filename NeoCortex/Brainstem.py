@@ -237,7 +237,7 @@ while(True):
             if (abs(time.time()-whenreceivedcommand)>60000):
                 print 'Sending a multicast of my own ip address:'+myip
                 broadcastingme(dobroadcastip,noticer,sock,myip)
-                break
+                
 
         if (sur.command != None and len(sur.command)>0):
             # Something was received
@@ -282,9 +282,11 @@ while(True):
             elif (data=='D'):
                 ssmr.write('A2'+'{:3d}'.format(50))
             elif (data==' '):
+                print("Stopping...")
                 if (speed<120):
                     ssmr.write('A3010')
                     ssmr.write('A3000')
+                    ssmr.write('A0000')
             elif (data=='H'):
                 ssmr.write('=')
             elif (data==';'):
@@ -328,6 +330,8 @@ while(True):
                 ssmr.write('O')
             elif (data=='='):
                 ssmr.write('=')
+            elif (data=='R'):
+                raise Exception('Restarting serial connection...')
             elif (data=='('):
                 sensorimotor.sensorlocalburst = 100
             elif (data==')'):

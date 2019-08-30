@@ -308,37 +308,21 @@ void scan()
 int StateMachine(int state, int controlvalue)
 {
   static int previousState = 0;
-  if (state != previousState)
-  {
-    resetEncoders();
-  }
   switch (state)
   {
     case 1:
       // Left
-      if (!precise)
-      {
-        rightMotor->setSpeed(controlvalue);
-        rightMotor->run(FORWARD);
-        leftMotor->setSpeed(controlvalue);
-        leftMotor->run(BACKWARD); 
-      } else
-      {
-        pcontrol(rightMotor,40,-1350, sensor.rightEncoder);
-      }
+      rightMotor->setSpeed(0);
+      rightMotor->run(FORWARD);
+      leftMotor->setSpeed(controlvalue);
+      leftMotor->run(BACKWARD); 
       break;
     case 2:
       // Right
-      if (!precise)
-      {
-        rightMotor->setSpeed(controlvalue);
-        rightMotor->run(BACKWARD);
-        leftMotor->setSpeed(controlvalue);
-        leftMotor->run(FORWARD);
-      } else 
-      {
-        pcontrol(leftMotor,40,-6800, sensor.leftEncoder);
-      }
+      rightMotor->setSpeed(controlvalue);
+      rightMotor->run(BACKWARD);
+      leftMotor->setSpeed(0);
+      leftMotor->run(FORWARD);
       break;
     case 3:
       rightMotor->setSpeed(controlvalue);
@@ -383,6 +367,7 @@ int StateMachine(int state, int controlvalue)
       break;
     default:
       // Do Nothing
+      resetEncoders();
       state = 0;
       break;
   }  

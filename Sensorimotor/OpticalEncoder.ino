@@ -52,8 +52,8 @@ void setupMotorEncoders()
   pinMode(RH_ENCODER_B, INPUT);
   
   // initialize hardware interrupts
-  attachInterrupt(0, leftEncoderEvent, CHANGE);
-  attachInterrupt(1, rightEncoderEvent, CHANGE);  
+  attachInterrupt(digitalPinToInterrupt(LH_ENCODER_A), leftEncoderEvent, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RH_ENCODER_A), rightEncoderEvent, CHANGE);  
 }
 
 void loopEncoders()
@@ -69,7 +69,8 @@ void loopEncoders()
 
 void resetEncoders()
 {
-  rightCount = leftCount = 0;
+  rightCount = 0; 
+  leftCount = 0;
   
 }
 
