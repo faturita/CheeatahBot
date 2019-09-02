@@ -349,7 +349,7 @@ while(True):
 
         # Instruct the Sensorimotor Cortex to stop wandering.
         if (ssmr != None):
-            ssmr.write('C')
+            sensorimotor.cleanbuffer(ssmr)
 
 vst.keeprunning = False
 sur.keeprunning = False

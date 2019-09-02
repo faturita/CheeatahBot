@@ -71,6 +71,7 @@ getch = _find_getch()
 
 print('Press X to stop Bot')
 print('Press x to exit this controller')
+print('Press f to enter new update frequency for the bot.')
 
 while (True):
   print '>'
@@ -79,6 +80,11 @@ while (True):
   if (data.startswith('x')):
       sock.close()
       quit()
+
+  if (data.startswith('f')):
+      newfreq = input('Freq:');
+      sent = sock.sendto('AE'+'{:3d}'.format(newfreq), server_address)
+
 
   sent = sock.sendto('U'+data+'000', server_address)
 
