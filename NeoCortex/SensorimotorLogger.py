@@ -120,8 +120,6 @@ class Sensorimotor:
     def picksensorsample(self, ser):
         # read  Embed this in a loop.
         self.counter=self.counter+1
-        print(self.sensorlocalburst)
-        print(self.sensorburst)
         if (self.counter>self.sensorlocalburst):
             ser.write('S')
             self.counter=0
