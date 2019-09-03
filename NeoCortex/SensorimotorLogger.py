@@ -75,6 +75,12 @@ class Sensorimotor:
         self.mapping = gimmesomething(ser)
 
 
+    def flush(self, ser):
+        ser.flush()
+        ser.flushInput()
+        ser.flushOutput()
+
+
     def cleanbuffer(self, ser):
         # Cancel sensor information.
         ser.write('X')
@@ -82,11 +88,14 @@ class Sensorimotor:
 
         # Ser should be configured in non-blocking mode.
         ser.read(1000)
+        self.flush(ser)
 
         ser.write('AB'+'{:3d}'.format(self.sensorburst))
         ser.write('AE'+'{:3d}'.format(self.updatefreq))
-        # Reactive sensor information
-        ser.write('S')
+
+        time.sleep(1)
+        msg = ser.read(1000)
+        print(msg)
 
 
     def log(self, mapping,data):
@@ -111,8 +120,9 @@ class Sensorimotor:
     def picksensorsample(self, ser):
         # read  Embed this in a loop.
         self.counter=self.counter+1
+        print(self.sensorlocalburst)
+        print(self.sensorburst)
         if (self.counter>self.sensorlocalburst):
-            ser.write('P')
             ser.write('S')
             self.counter=0
         myByte = ser.read(1)
