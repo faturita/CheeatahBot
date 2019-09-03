@@ -349,6 +349,9 @@ while(True):
 
         # Instruct the Sensorimotor Cortex to stop wandering.
         if (ssmr != None):
+            sensorimotor.sensorlocalburst=100
+            sensorimotor.sensorburst=10
+            sensorimotor.updatefreq=5
             sensorimotor.cleanbuffer(ssmr)
 
 vst.keeprunning = False
