@@ -1,6 +1,5 @@
  /*
- * I dont have more pins so I need to use the pins available from 
- *  this arduino to decode the encoder information.
+ * Inexpensive Keyes Rotary Encoder.
  */
 
 int pinA = 12;  // Connected to CLK on KY-040

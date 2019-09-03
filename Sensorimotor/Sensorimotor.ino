@@ -312,7 +312,7 @@ int StateMachine(int state, int controlvalue)
   {
     case 1:
       // Left
-      rightMotor->setSpeed(0);
+      rightMotor->setSpeed(controlvalue);
       rightMotor->run(FORWARD);
       leftMotor->setSpeed(controlvalue);
       leftMotor->run(BACKWARD); 
@@ -321,7 +321,7 @@ int StateMachine(int state, int controlvalue)
       // Right
       rightMotor->setSpeed(controlvalue);
       rightMotor->run(BACKWARD);
-      leftMotor->setSpeed(0);
+      leftMotor->setSpeed(controlvalue);
       leftMotor->run(FORWARD);
       break;
     case 3:
@@ -375,36 +375,6 @@ int StateMachine(int state, int controlvalue)
   return state;
 }
 
-//void loop1()
-//{
-//  int state,controlvalue;
-//  
-//  sensor.fps = fps();
-//
-//  parseCommand(state,controlvalue);
-//  
-//  updateEncoder();
-//  sensor.armencoder = getEncoderPos();
-//  
-//  //domotor(leftMotor, speed, FORWARD);
-//  //domotor(rightMotor, speed, FORWARD);
-//  updatedc(elbowMotor, getEncoderPos());
-//
-//  //loopencoder();
-//
-//  checksensors();
-//  //updateUltraSensor();
-//  updateSuperSensor();
-//
-//  pan.update();
-//  sensor.pan = pan.pos;
-//  scanner.update();
-//  sensor.scan = scanner.pos;
-//
-//  StateMachine(state,controlvalue);
-//
-//  //delay(250);
-//}
 
 int homingcounter=0;
 int homing=0;
