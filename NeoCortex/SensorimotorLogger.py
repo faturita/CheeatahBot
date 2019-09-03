@@ -16,9 +16,11 @@ import Configuration
 def readsomething(ser, length):
     #data = smnr.read(38)
     data = ''
+    tries = 1000
 
-    while(len(data)<length):
+    while(len(data)<length and tries>0):
         byte = ser.read(1)
+        tries = tries+1
         if (len(byte)>0):
             data = data + byte
 

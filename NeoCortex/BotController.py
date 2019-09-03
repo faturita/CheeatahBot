@@ -84,7 +84,7 @@ while (True):
   if (data.startswith('f')):
       newfreq = input('Freq:');
       sent = sock.sendto('AE'+'{:3d}'.format(newfreq), server_address)
-      sent = sock.sendto('AB'+'{:3d}'.format(10), server_address)
+      sent = sock.sendto('AB'+'{:3d}'.format(1), server_address)
 
 
   sent = sock.sendto('U'+data+'000', server_address)
