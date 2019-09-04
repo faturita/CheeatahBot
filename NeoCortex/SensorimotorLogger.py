@@ -14,13 +14,12 @@ import Configuration
 
 
 def readsomething(ser, length):
-    #data = smnr.read(38)
     data = ''
-    tries = 1000
+    trials = 10000000
 
-    while(len(data)<length and tries>0):
+    while(len(data)<length and trials>0):
         byte = ser.read(1)
-        tries = tries+1
+        trials = trials - 1
         if (len(byte)>0):
             data = data + byte
 
@@ -32,7 +31,6 @@ def gimmesomething(ser):
         if (len(line)>0):
             break
     return line
-
 
 
 class Sensorimotor:
@@ -122,6 +120,7 @@ class Sensorimotor:
     def picksensorsample(self, ser):
         # read  Embed this in a loop.
         self.counter=self.counter+1
+        print(self.counter)
         if (self.counter>self.sensorlocalburst):
             ser.write('S')
             self.counter=0

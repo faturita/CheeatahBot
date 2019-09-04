@@ -333,7 +333,7 @@ while(True):
             elif (data=='R'):
                 raise Exception('Restarting serial connection...')
             elif (data=='('):
-                sensorimotor.sensorlocalburst = 100
+                sensorimotor.sensorlocalburst = 1
             elif (data==')'):
                 sensorimotor.sensorlocalburst = 10000
             elif (data=='X'):
