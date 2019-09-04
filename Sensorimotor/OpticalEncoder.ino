@@ -1,3 +1,19 @@
+/**
+ * DC Motors:
+ * https://core-electronics.com.au/makeblock-optical-encoder-motor-25-6v-185rpm.html
+ * http://store.makeblock.com/optical-encoder-motor-25-6v-185rpm/
+ * 
+ *   Motor pins (6):
+ *    M+ M- GND VCC A B
+ *
+ *    M+, M- Motor Power bidirectional
+ *    GND, VCC .  Encoder power, 5V
+ *
+ *    A - Digital Pin 2: This is the interrupt pin
+ *    B - Digital Pin 4: This is the output b, the encoding signal.
+ *
+ */
+
 // Pins for the optical encoder inputs.
 // The pin 2 and 3 are the interrupt pins 0 and 1 for Arduino UNO
 #define RH_ENCODER_A 3 

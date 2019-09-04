@@ -44,6 +44,9 @@ void parseCommand(int &state, int &controlvalue)
       case 'I':
         Serial.println("CHET");
         break;
+      case 'V':
+        Serial.println(codeversion);
+        break;
       case 'S':
         startburst();
         break;

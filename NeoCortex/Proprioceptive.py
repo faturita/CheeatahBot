@@ -19,7 +19,8 @@ def serialcomm(serialportname=None):
     serials = []
 
     if (serialportname):
-        # 0.050
+        # On RPi putting timeout to 0.0 is nonblocking.
+        # Puting timeout to 0.050 waste a lot of processing time waiting doing nothing, but yields the processor.
         sera = serial.Serial(port=serialportname, baudrate=baudrate,timeout=0.0)
         serials.append(sera)
     else:

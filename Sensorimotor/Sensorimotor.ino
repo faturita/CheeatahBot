@@ -1,29 +1,11 @@
 /**
     CheatahBot
-    
-    Basic Program to decode the driving signal of a DC Motor
-    Particularly,
-
-    DC Motor http://store.makeblock.com/optical-encoder-motor-25-6v-185rpm/
-
-    Motor pins
-     M+ M- GND VCC A B
-
-     M+, M- Motor Power bidirectional
-     GND, VCC .  Encoder power, 5V
-
-     A - Digital Pin 2
-     B - Digital Pin 4
-
 
      Tilt sensor
      G - GND
      R - VCC
      Y - Signal - 8
 
-     With this configuration it will work.  If you turn the motor
-     you need to change the sign of the encoder counter on the
-     Decoder function that is being callled at each interrupt.
 */
 
 #include <Wire.h>
@@ -33,6 +15,7 @@
 
 unsigned long tick = 0;
 bool debug = false;
+char* codeversion="1.0";
 
 bool precise = false;
 
@@ -188,48 +171,6 @@ Adafruit_DCMotor *elbowMotor = AFMS.getMotor(3);
 Adafruit_DCMotor *myMotor4 = AFMS.getMotor(4);
 // You can also make another motor on port M2
 //Adafruit_DCMotor *myOtherMotor = AFMS.getMotor(2);
-
-
-
-void setup1() {
-  Serial.begin(9600);           // set up Serial library at 9600 bps
-  Serial.println("CheeatahBot Baby Monitor");
-
-  AFMS.begin();  // create with the default frequency 1.6KHz
-  //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
-
-  // Set the speed to start, from 0 (off) to 255 (max speed)
-  rightMotor->setSpeed(1);
-  rightMotor->run(FORWARD);
-  // turn on motor
-  rightMotor->run(RELEASE);
-
-  leftMotor->setSpeed(1);
-  leftMotor->run(FORWARD);
-  // turn on motor
-  leftMotor->run(RELEASE);
-
-  elbowMotor->setSpeed(1);
-  elbowMotor->run(FORWARD);
-  // turn on motor
-  elbowMotor->run(RELEASE);
-
-  setupMotorEncoders();
-  setupEncoder();
-  setupUltraSensor();
-  setupSuperSensor();
-
-  scanner.servo.attach(10);
-  scanner.pos=0;
-  scanner.tgtPos=90; 
-
-  pan.servo.attach(9);
-  pan.pos = 0;
-  pan.tgtPos = 60;// 57 is center
-
-  setTargetPos(0);
-  
-}
 
 void domotor(Adafruit_DCMotor *myMotor, int spd, int dir) {
   myMotor->setSpeed(spd);
@@ -425,7 +366,8 @@ void doHome()
 
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
-  Serial.println("CheeatahBot Baby Monitor");
+  Serial.setTimeout(1000);      // timeout in milliseconds
+  Serial.print("CheeatahBot v");Serial.println(codeversion);
 
   AFMS.begin();  // create with the default frequency 1.6KHz
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz

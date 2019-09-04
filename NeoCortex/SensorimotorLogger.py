@@ -12,7 +12,8 @@ import sys
 
 import Configuration
 
-
+# There could be a chance that whatever is behind the serial connection get stuck
+# and do not reply anything.  Hence I need a way to break this up (that is what trials is for)
 def readsomething(ser, length):
     data = ''
     trials = 10000000

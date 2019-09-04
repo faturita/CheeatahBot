@@ -1,5 +1,13 @@
 #define MAX_SIZE_SENSOR_BURST 100
 
+
+// Telemetry control variables.
+bool sensorburst = false;
+int transmittedCounter = 0;
+int burstsize = MAX_SIZE_SENSOR_BURST;
+int updateFreq = 1;
+
+
 int freq()
 {
   static int freqValue = 200;
@@ -26,20 +34,16 @@ int freq()
   return freqValue;
 }
 
-bool sensorburst = false;
-int transmittedCounter = 0;
-int burstsize = MAX_SIZE_SENSOR_BURST;
-
-int updateFreq = 1;
-
 void setBurstSize(int pburstsize)
 {
   burstsize = pburstsize;
+  if (debug) {Serial.print("BurstSize:");Serial.println(burstsize);}
 }
 
 void setUpdateFreq(int controlvalue) 
 {
   updateFreq = controlvalue;
+  if (debug) {Serial.print("Freq:");Serial.println(updateFreq);}
 }
 
 
