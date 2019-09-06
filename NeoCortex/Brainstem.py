@@ -335,7 +335,7 @@ while(True):
             elif (data=='('):
                 sensorimotor.sensorlocalburst = 1
             elif (data==')'):
-                sensorimotor.sensorlocalburst = 10000
+                sensorimotor.sensorlocalburst = 1000
             elif (data=='X'):
                 break
     except Exception as e:
