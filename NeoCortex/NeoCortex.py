@@ -245,4 +245,4 @@ print "Insisting...."
 for i in range(1,100):
     sent = sockcmd.sendto(data, server_address)
 
-sock.close()
+sockcmd.close()

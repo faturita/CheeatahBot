@@ -5,7 +5,7 @@
 bool sensorburst = false;
 int transmittedCounter = 0;
 int burstsize = MAX_SIZE_SENSOR_BURST;
-int updateFreq = 1;
+int updateFreq = 5;
 
 
 int freq()
