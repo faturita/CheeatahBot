@@ -85,9 +85,12 @@ while (True):
       newfreq = input('Freq:');
       sent = sock.sendto('AE'+'{:3d}'.format(newfreq), server_address)
       sent = sock.sendto('AB'+'{:3d}'.format(1), server_address)
-
-
-  sent = sock.sendto('U'+data+'000', server_address)
+  elif (data.startswith('c')):
+      print('Command:')
+      cmd = sys.stdin.readline()
+      sent = sock.sendto(cmd, server_address)
+  else:
+      sent = sock.sendto('U'+data+'000', server_address)
 
   if (data.startswith('!')):
       print "Letting know Bot that I want streaming...."

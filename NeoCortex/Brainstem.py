@@ -188,9 +188,9 @@ sensesensor = False
 sensorimotor = senso.Sensorimotor('sensorimotor',40,'fiiihhhhhhhhhhhh')
 sensorimotor.start()
 sensorimotor.init(ssmr)
-sensorimotor.sensorlocalburst=100
-sensorimotor.sensorburst=10
-sensorimotor.updatefreq=5
+sensorimotor.sensorlocalburst=1000
+sensorimotor.sensorburst=100
+sensorimotor.updatefreq=10
 sensorimotor.cleanbuffer(ssmr)
 
 sur = Surrogator.Surrogator(sock)
@@ -351,6 +351,8 @@ while(True):
         if (ssmr != None):
             sensorimotor.flush(ssmr)
             sensorimotor.cleanbuffer(ssmr)
+            ssmr.write('AE010')
+            ssmr.write('AB100')
 
 vst.keeprunning = False
 sur.keeprunning = False
