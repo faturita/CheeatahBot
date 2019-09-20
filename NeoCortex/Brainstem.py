@@ -101,9 +101,6 @@ def doserial():
 
 [ssmr, mtrn] = doserial()
 
-if (ssmr == None and mtrn == None):
-    quit()
-
 # Initialize UDP Controller Server on port 10001 (ShinkeyBotController)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('0.0.0.0', 10001)
@@ -159,6 +156,10 @@ if (dobroadcastip):
 
 print 'Connection to Remote Controller established.'
 
+print('Checking connection to serial interface.')
+if (ssmr == None and mtrn == None):
+    quit()
+
 def terminateme():
     try:
         t.cancel()
@@ -192,6 +193,8 @@ sensorimotor.sensorlocalburst=1000
 sensorimotor.sensorburst=100
 sensorimotor.updatefreq=10
 sensorimotor.cleanbuffer(ssmr)
+ssmr.write('AE010')
+ssmr.write('AB100')
 
 sur = Surrogator.Surrogator(sock)
 

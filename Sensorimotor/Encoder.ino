@@ -55,3 +55,4 @@ void resetEncoderPos()
 {
   encoderPosCount=0;
 }
+

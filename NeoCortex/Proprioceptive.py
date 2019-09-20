@@ -11,7 +11,7 @@ import datetime
 
 
 baudrate = 9600
-
+baudrate = 115200
 
 def serialcomm(serialportname=None):
     retries=0
