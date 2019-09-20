@@ -365,7 +365,7 @@ void doHome()
 #define echoPin 7
 
 void setup() {
-  Serial.begin(9600);           // set up Serial library at 9600 bps
+  Serial.begin(115200);           // set up Serial library at 9600 bps
   Serial.setTimeout(1000);      // timeout in milliseconds
   Serial.print("CheeatahBot v");Serial.println(codeversion);
 
