@@ -11,52 +11,56 @@ import datetime
 
 
 baudrate = 9600
-baudrate = 115200
+
 
 def serialcomm(serialportname=None):
-    retries=0
     serialport = 0
-    serials = []
+    sera = None
+    serb = None
 
     if (serialportname):
-        # On RPi putting timeout to 0.0 is nonblocking.
-        # Puting timeout to 0.050 waste a lot of processing time waiting doing nothing, but yields the processor.
-        sera = serial.Serial(port=serialportname, baudrate=baudrate,timeout=0.0)
-        serials.append(sera)
-    else:
+        sera = serial.Serial(port=serialportname, baudrate=baudrate,timeout=0)
+    if (sera == None):
         while (serialport<15):
             if (os.path.exists('/dev/ttyACM'+str(serialport))):
-                sera = serial.Serial(port='/dev/ttyACM'+str(serialport), baudrate=baudrate, timeout=0.0)
-                sera.flushInput()
-                serials.append(sera)
+                sera = serial.Serial(port='/dev/ttyACM'+str(serialport), baudrate=baudrate, timeout=0)
+                break
+            serialport = serialport + 1
+
+        serialport = serialport + 1
+        while (serialport<15):
+            if (os.path.exists('/dev/ttyACM'+str(serialport))):
+                serb = serial.Serial(port='/dev/ttyACM'+str(serialport), baudrate=baudrate, timeout=0)
                 break
             serialport = serialport + 1
 
     time.sleep(5)
 
-    if (len(serials)==0):
-        return [None, None]
+    if (sera == None and serb != None):
+        return [serb, sera]
+    elif (sera != None and serb == None):
+        return [sera, serb]
 
-    for sera in serials:
-        idstring = sera.read(250)
-        print idstring
+    # Initialize connection with Arduino
+    idstring = sera.read(1000)
+    if (serb):
+        idstring = serb.read(1000)
 
-        for tries in range(1, 10):
-            sera.write('I')
-            time.sleep(1)
-            idstring = sera.read(100)
-            print idstring
+    for tries in range(1, 10):
+        sera.write('I')
+        time.sleep(1)
+        idstring = sera.read(100)
 
-            if ('CHET' in idstring):
-                mrn = None
-                smr = sera
-                print('CheeatahBot detected.')
-                return [smr, mrn]
-            elif ('MTRN' in idstring):
-                smr = serb
-                mrn = sera
-                print('Motornneuron,Sensorimotor detected.')
-                return [smr, mrn]
+        if ('SSMR' in idstring):
+            mrn = serb
+            smr = sera
+            print('Sensorimotor,Motorneuron detected.')
+            return [smr, mrn]
+        elif ('MTRN' in idstring):
+            smr = serb
+            mrn = sera
+            print('Motornneuron,Sensorimotor detected.')
+            return [smr, mrn]
 
     print ('Did not find serial')
     return [None, None]

@@ -1,6 +1,4 @@
 #coding: latin-1
-#sensorimotor = Sensorimotor('sensorimotor',66,'fffffffffffhhhhhhhhhhh')
-
 import serial
 import time
 import datetime
@@ -13,31 +11,12 @@ import sys
 import Configuration
 
 
-def readsomething(ser, length):
-    #data = smnr.read(38)
-    data = ''
-
-    while(len(data)<length):
-        byte = ser.read(1)
-        if (len(byte)>0):
-            data = data + byte
-
-    return data
-
-def gimmesomething(ser):
-    while True:
-        line = ser.readline()
-        if (len(line)>0):
-            break
-    return line
-
-
-
-class Sensorimotor:
-    def __init__(self, name, length, mapping):
+class SensorimotorCortex:
+    def __init__(self, connection, name, length, mapping=''):
+        self.connection = connection
         self.name = name
         self.keeprunning = True
-        self.ip = Configuration.controllerip
+        self.ip = '127.0.0.1'
         self.telemetryport = Configuration.telemetryport
         self.sensors = None
         self.data = None
@@ -45,48 +24,60 @@ class Sensorimotor:
         self.mapping = mapping
         self.sensorlocalburst=1
         self.sensorburst=1
-        self.updatefeq=1
+        self.updatefreq=1
         self.ztime = int(time.time())
 
     def start(self):
         # Sensor Recording
         ts = time.time()
         st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
-        self.f = open('../data/sensor.'+self.name+'.'+st+'.dat', 'w')
+        self.f = open('./data/sensor.'+self.name+'.'+st+'.dat', 'w')
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.server_address = (self.ip, self.telemetryport)
         self.counter = 0
 
-
-    def init(self, ser):
+    def init(self):
         # Clean buffer
-        ser.read(1000)
+        self.connection.read(1000)
 
-        ser.write('AC'+'000')
+        # Send the command to obtain the length of the dataframe
+        self.connection.send(b'AC000')
         time.sleep(2)
-        leng = readsomething(ser,2) # Reading INT
+        leng = self.connection.readsomething(2) # Reading INT
 
+        # Send the command to obtain the format of the dataframe
         datapack=unpack('h',leng)
         self.length = datapack[0]
 
-        ser.write('AD'+'000')
+        self.connection.send(b'AD000')
         time.sleep(3)
-        self.mapping = gimmesomething(ser)
+        self.mapping = self.connection.gimmesomething().decode('ascii')
+
+        print ('Length:'+str(self.length))
+        print ('Format:'+self.mapping)
+
+    def stop(self):
+        self.connection.send(b'A3010')
+        self.connection.send(b'A3000')
+        self.connection.send(b'A0000')
 
 
-    def cleanbuffer(self, ser):
+    def cleanbuffer(self):
         # Cancel sensor information.
-        ser.write('X')
+        self.connection.send(b'X')
         time.sleep(6)
 
         # Ser should be configured in non-blocking mode.
-        ser.read(1000)
+        self.connection.read(1000)
+        self.connection.flush()
 
-        ser.write('AB'+'{:3d}'.format(self.sensorburst))
-        ser.write('AE'+'{:3d}'.format(self.updatefreq))
-        # Reactive sensor information
-        ser.write('S')
+        self.connection.send(bytes('AB'+'{:30d}'.format(self.sensorburst),'ascii'))
+        self.connection.send(bytes('AE'+'{:30d}'.format(self.updatefreq),'ascii'))
+
+        time.sleep(1)
+        msg = self.connection.read(1000)
+        print(msg)
 
 
     def log(self, mapping,data):
@@ -95,7 +86,11 @@ class Sensorimotor:
         self.f.write(str(ts) + ' '+ ' '.join(map(str, new_values)) + '\n')
 
     def send(self,data):
-        sent = self.sock.sendto(data, self.server_address)
+        try:
+            sent = self.sock.sendto(data, self.server_address)
+        except Exception as e:
+            print('Telemetry Error:'+str(e))
+            # @FIXME: Do nothing right now but I think I should restart the socket.
 
     def repack(self,list_pos,list_values):
         new_values = unpack(self.mapping, self.data)
@@ -108,24 +103,24 @@ class Sensorimotor:
         new_values = tuple(new_values)
         self.data = pack(self.mapping, *new_values)
 
-    def picksensorsample(self, ser):
+    def picksensorsample(self):
         # read  Embed this in a loop.
         self.counter=self.counter+1
         if (self.counter>self.sensorlocalburst):
-            ser.write('P')
-            ser.write('S')
+            self.connection.send(b'S')
             self.counter=0
-        myByte = ser.read(1)
-        if myByte == 'S':
+        myByte = self.connection.read(1)
+        #print(myByte)
+        if (myByte == b'S'):
           readcount = 0
           #data = readsomething(ser,44)
-          self.data = readsomething(ser,self.length)
-          myByte = readsomething(ser,1)
-          if len(myByte) >= 1 and myByte == 'E':
+          self.data = self.connection.readsomething(self.length)
+          myByte = self.connection.readsomething(1)
+          if len(myByte) >= 1 and myByte == b'E':
               # is  a valid message struct
               #new_values = unpack('ffffffhhhhhhhhhh', data)
               new_values = unpack(self.mapping, self.data)
-              print new_values
+              print (new_values)
               self.sensors = new_values
               return new_values
 
@@ -134,7 +129,18 @@ class Sensorimotor:
     def close(self):
         self.f.close()
         self.sock.close()
+        self.connection.close()
 
     def restart(self):
-        self.close()
+        self.f.close()
+        self.sock.close()
         self.start()
+
+    def reset(self):
+        self.connection.flush()
+        self.cleanbuffer()
+
+
+#sensorimotor = Sensorimotor('sensorimotor',66,'fffffffffffhhhhhhhhhhh')
+
+
