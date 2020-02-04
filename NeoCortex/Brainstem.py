@@ -225,7 +225,7 @@ while(True):
 
             if (sens != None):
                 # Check where to put the value
-                sensorimotor.repack([10],[fps.fps])
+                sensorimotor.repack([0],[fps.fps])
                 sensorimotor.send(sensorimotor.data)
 
         #if (cmd_data != ''):
@@ -316,7 +316,7 @@ while(True):
             elif (cmd_data==','):
                 motor.speed = motor.speed + 50
                 if (motor.speed>250):
-                    spemotor.speeded = 250
+                    motor.speed = 250
             elif (cmd_data=='.'):
                 motor.speed = 50
             elif (cmd_data=='{'):

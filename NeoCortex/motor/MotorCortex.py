@@ -22,7 +22,7 @@ class MotorCortex:
         self.connection.send(bytes('A2'+'{:3d}'.format(self.speed),'ascii'))
 
     def move_right(self):
-        self.connection.send(bytes('A4'+'{:3d}'.format(self.speed),'ascii'))
+        self.connection.send(bytes('A1'+'{:3d}'.format(self.speed),'ascii'))
 
     def increase_speed(self):
         self.speed = self.speed + 10
