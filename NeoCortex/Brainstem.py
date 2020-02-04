@@ -110,7 +110,9 @@ if (dosomestreaming):
         print('Error starting H264 stream thread:'+str(e))
 
 
-visualpos = [90, 95]
+# Pan and tilt
+visualpos = [60,150,90]
+
 scan = 90
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
 #  sent to listening servers.
@@ -199,7 +201,7 @@ def terminate():
 signal.signal(signal.SIGINT, lambda signum, frame: terminate())
 signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 
-print('ShinkeyBot ready.')
+print('CheaatahBot ready.')
 # Beeping !!!!
 connection.send(b'B')
 
